@@ -4,10 +4,10 @@ class ItemCompra {
 
 	Compra compra
 	Produto produto
-	int quantidade
-	double valorUnitario
+	Double quantidade
+	Double valorUnitario
 	
-	static belongsTo = Compra
+	static belongsTo = [compra:Compra]
 	
     static constraints = {
 		produto(nullable:false)

@@ -3,11 +3,12 @@ package livrocaixa
 class Despesa {
 
 	TipoDespesa tipodespesa
-	Date lastUpdate = new Date()
-	double valor
+	Date data = new Date()
+	Double valor
 	
     static constraints = {
 		tipodespesa(nullable: false)
+		valor(scale:2)
     }
 	
 	String toString() {

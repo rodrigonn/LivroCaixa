@@ -3,8 +3,7 @@ package livrocaixa
 class Cliente {
 
 	String nome
-	String cpf
-	String cnpj
+	String cpfCnpj
 	Vendedor vendedor
 	
     static constraints = {

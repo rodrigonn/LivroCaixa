@@ -2,22 +2,23 @@ package livrocaixa
 
 class Venda {
 	
-	long nf
+	Long numeroNotaFiscal
 	Cliente cliente
 	Vendedor vendedor
-	double comissao
-	double outrosCustos
-	Date lastUpdate = new Date()
+	Double comissao
+	Double outrosCustos
+	Date data = new Date()
 	Date vencimento = new Date()
-	char Status
+	String status
 	static hasMany = [itemVenda: ItemVenda]
 
     static constraints = {
-		nf(nullable:false,blank:false)
+		numeroNotaFiscal(nullable:false,blank:false)
+		status(inList:["Em aberto", "Pago", "Atrasado", "Cancelado"])
     }
 	
 	String toString() {
-		return "${nf}"
+		return "$numeroNotaFiscal - $status"
 	}
 	
 }

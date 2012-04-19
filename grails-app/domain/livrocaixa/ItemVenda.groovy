@@ -4,16 +4,16 @@ class ItemVenda {
 	
 	Venda venda
 	Produto produto
-	double quantidade
-	double valorUnitario
+	Double quantidade
+	Double valorUnitario
 	
-	static belongsTo = Venda
+	static belongsTo = [venda:Venda]
 
     static constraints = {
 		venda(nullable:false)
 		produto(nullable:false)
 		quantidade(nullable:false,blank:false)
-		valorUnitario(nullable:false,blank:false)
+		valorUnitario(nullable:false,blank:false, scale:2)
     }
 	
 	String toString() {

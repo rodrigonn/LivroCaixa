@@ -4,9 +4,8 @@ class Produto {
 
 	String nome
 	String tipo
-	Fornecedor fornecedor
 	
-	static belongsTo = Fornecedor
+	static belongsTo = [fornecedor:Fornecedor]
 	
     static constraints = {
 		nome(nullable:false,blank:false)
@@ -14,6 +13,6 @@ class Produto {
     }
 	
 	String toString() {
-		return "${nome} do tipo ${tipo}"
+		return (tipo) ? "${nome} - ${tipo}" : "${nome}"
 	}
 }
