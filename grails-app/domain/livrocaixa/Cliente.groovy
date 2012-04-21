@@ -8,6 +8,7 @@ class Cliente {
 	
     static constraints = {
 		nome(nullable:false,blank:false)
+		vendedor(nullable:true)
     }
 	
 	String toString() {

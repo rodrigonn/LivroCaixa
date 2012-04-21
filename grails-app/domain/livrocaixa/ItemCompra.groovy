@@ -2,7 +2,6 @@ package livrocaixa
 
 class ItemCompra {
 
-	Compra compra
 	Produto produto
 	Double quantidade
 	Double valorUnitario
@@ -16,6 +15,6 @@ class ItemCompra {
     }
 	
 	String toString() {
-		return "${produto}"
+		return "${produto} - $quantidade"
 	}
 }

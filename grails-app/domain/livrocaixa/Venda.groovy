@@ -9,6 +9,7 @@ class Venda {
 	Double outrosCustos
 	Date data = new Date()
 	Date vencimento = new Date()
+	Double valorPago
 	String status
 	static hasMany = [itemVenda: ItemVenda]
 

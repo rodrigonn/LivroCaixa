@@ -9,7 +9,7 @@ class Vendedor {
 	
     static constraints = {
 		nome(nullable:false, blank:false)
-		cpf ()
+		cpf (cpf:true)
     }
 	
 	String toString() {

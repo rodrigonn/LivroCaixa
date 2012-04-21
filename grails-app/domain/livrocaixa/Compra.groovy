@@ -6,13 +6,15 @@ class Compra {
 	Date data = new Date()
 	Fornecedor fornecedor
 	Date vencimento = new Date()
-	String Status
+	Double valorPago
+	String status
+	
 	static hasMany = [itemCompra: ItemCompra]
 
     static constraints = {
 		
 		numeroNotaFiscal(nullable:false, blank:false)
-		
+		status(inList:["Em aberto", "Pago", "Atrasado", "Cancelado"])
     }
 	
 	String toString() {
