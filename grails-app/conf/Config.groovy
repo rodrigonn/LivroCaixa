@@ -34,6 +34,7 @@ grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
 // What URL patterns should be processed by the resources plugin
 grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*']
 
+grails.views.javascript.library="jquery"
 
 // The default codec used to encode data with ${}
 grails.views.default.codec = "none" // none, html, base64
