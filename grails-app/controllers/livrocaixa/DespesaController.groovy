@@ -7,11 +7,11 @@ class DespesaController {
 	def scaffold = true
 
 	def exemplo = {
-		
+		render "ABC"
 	}
 
-	def editJSON = {
-		
+	def fieldEdit = {
+		println(params)
 	}
 		
 	def listJSON = {
