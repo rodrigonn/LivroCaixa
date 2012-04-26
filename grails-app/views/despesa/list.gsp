@@ -6,6 +6,7 @@
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'despesa.label', default: 'Despesa')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>
+	    <r:require module="jquery-ui"/>
 	
 
 	</head>
@@ -53,12 +54,15 @@
 					</tr>
 					
 				<script>
-					bindEdicaoLinha(${despesaInstance.id});
-					bindNovo(4);
+					bindEdicaoLinha('despesa', ${despesaInstance.id});
 				</script>
 				
 				</g:each>
 				</tbody>
+
+				<script>
+					bindNovo('despesa', 4);
+				</script>
 				
 			
 			</table>

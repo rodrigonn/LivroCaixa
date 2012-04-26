@@ -1,18 +1,32 @@
-// Widgets
+//Defaults
+$.datepicker.setDefaults( $.datepicker.regional[ "pt-BR" ] );
+
+// Mapas de configuração
 
 window.tipo2widgetFunc = {}
+window.tipo2setFunc = {}
 window.coluna2widget = {}
+window.entidade2colunas = {}
 
 registrarTipos();
 
 function registrarTipos() {
 	window.tipo2widgetFunc['number'] = criarNumber;
+	window.tipo2setFunc['number'] = text2Value;
+	
 	window.tipo2widgetFunc['text'] = criarText;
-	window.tipo2widgetFunc['date'] = criarDate;
+	window.tipo2setFunc['text'] = text2Value;
+	
+	window.tipo2widgetFunc['date'] = criarDatePicker;
+	window.tipo2setFunc['data'] = text2Value;
+}
+
+function text2Value(elemento, text) {
+	elemento.val(text);
 }
 
 function criarNumber(idCampo, valor) {
-	return $('<input> type="number"', {
+	return $('<input type="number">', {
 		name: idCampo,
 		id: idCampo,
 		step: "0.01",
@@ -28,61 +42,36 @@ function criarText(idCampo, valor) {
 	});
 }
 
-function criarDate(idCampo, valor) {
-	var div = $('<div>', {
+function criarDatePicker(idCampo, valor) {
+	var input = $('<input type="text">', {
 		name: idCampo,
-		id: idCampo
+		id: idCampo,
+		value: valor
 	});
 	
-	var selectDia = $('<select>', {
-		name: idCampo + "_dia",
-		id: idCampo + "_dia"
-	});
-	div.append(selectDia);
+	input.datepicker();
 	
-	for (var i = 1; i <= 31; i++) {
-		$('<option value="' + i + '">' + i + '</value>').appendTo(selectDia);
-	}
-	
-	var selectMes = $('<select>', {
-		name: idCampo + "_mes",
-		id: idCampo + "_mes"
-	});
-	div.append(selectMes);
-	
-	$('<option value="1">Janeiro</value>').appendTo(selectMes);
-	$('<option value="2">Fevereiro</value>').appendTo(selectMes);
-	$('<option value="3">Março</value>').appendTo(selectMes);
-	$('<option value="4">Abril</value>').appendTo(selectMes);
-	$('<option value="5">Maio</value>').appendTo(selectMes);
-	$('<option value="6">Junho</value>').appendTo(selectMes);
-	$('<option value="7">Julho</value>').appendTo(selectMes);
-	$('<option value="8">Agosto</value>').appendTo(selectMes);
-	$('<option value="9">Setembro</value>').appendTo(selectMes);
-	$('<option value="10">Outubro</value>').appendTo(selectMes);
-	$('<option value="11">Novembro</value>').appendTo(selectMes);
-	$('<option value="12">Dezembro</value>').appendTo(selectMes);
-	
-	var selectAno = $('<select>', {
-		name: idCampo + "_ano",
-		id: idCampo + "_ano"
-	});
-	div.append(selectAno);
-	
-	for (var i = 1912; i <= 2112; i++) {
-		$('<option value="' + i + '">' + i + '</value>').appendTo(selectAno);
-	}
-	
-	return div;
+	return input;
 }
+
 
 function instanciarWidget(tipo, id, valor) {
 	return window.tipo2widgetFunc[tipo](id, valor)
 }
 
+function cadastrarEntidade(entidade) {
+	window.entidade2colunas[entidade] = [];	
+}
+
+function cadastrarColuna(entidade, nomeColuna, tipoColuna, valorDefaultColuna) {
+	window.entidade2colunas[entidade].push([nomeColuna, tipoColuna, valorDefaultColuna]);
+	window.coluna2widget[nomeColuna] = instanciarWidget(tipoColuna, nomeColuna, valorDefaultColuna) // TODO tirar isso daqui
+}
+
+
 // Eventos
 
-function bindNovo(colunas) {
+function bindNovo(entidade, colunas) { //TODO Usar list-entidade
 	$("body").bind('keypress', function(event){
 		if (event.charCode == 110 && event.altKey) { // Alt + n
 			var tr = $('<tr id="listagem0">');
@@ -91,27 +80,30 @@ function bindNovo(colunas) {
 			}
 			
 			$("#listagem").append(tr);
-			habilitaEdicaoLinha(0);
+			habilitaEdicaoLinha(entidade, 0);
 		}
 	});
 }
 
-function bindEdicaoLinha(id) {
+function bindEdicaoLinha(entidade, id) {
 	var handler = function () {
-		habilitaEdicaoLinha(id, handler)
+		habilitaEdicaoLinha(entidade, id, handler)
 	};
 					
 	$("#listagem" + id).bind('click', handler);	
 }
 
-function habilitaEdicaoLinha(id, handler) {
+function habilitaEdicaoLinha(entidade, id, handler) {
 	var tr = $("#listagem" + id);
-	habilitaEditar($(tr).children("td:nth-child(1)"), "tipoDespesa");
-	habilitaEditar($(tr).children("td:nth-child(2)"), "valor");
-	habilitaEditar($(tr).children("td:nth-child(3)"), "data");
+	
+	var colunas = window.entidade2colunas[entidade];
+	
+	for (var i = 1; i <= colunas.length; i++) {
+		habilitaEditar(tr.children("td:nth-child(" + i + ")"), colunas[i-1][0]);		
+	}
 	
 	if (handler)
-		$(tr).unbind('click', handler);
+		tr.unbind('click', handler);
 	
 	var link = null;
 	if (id && id > 0){
@@ -121,20 +113,20 @@ function habilitaEdicaoLinha(id, handler) {
 	}
 	
 	$("<a href='#' onclick='salvarAjax($(this), " + link + ")'>Salvar</a>")
-		.appendTo($(tr).children("td:nth-child(4)"))
+		.appendTo(tr.children("td:nth-child(4)"))
 		
-	$(tr).children("td:nth-child(4)").append(" ");
+	tr.children("td:nth-child(4)").append(" ");
 
 	$('<a href="#" onclick="excluirAvoAjax($(this), ' + link + ')">Excluir</a>')
-		.appendTo($(tr).children("td:nth-child(4)"))
+		.appendTo(tr.children("td:nth-child(4)"))
 }
 
 function habilitaEditar(elemento, idCampo) {
-	elemento.append(window.coluna2widget[idCampo])
-//	var valor = elemento.text()
-//	var campo = $("#widget_" + idCampo)
-//	campo.children("input:nth-child(1)").val(valor)
-//    elemento.html( campo.html() );
+	var valor = elemento.text();
+	var widget = window.coluna2widget[idCampo];
+	widget.val(valor);
+	elemento.empty();
+	elemento.append(widget);
 }
 
 function desabilitaEditar(elemento) {
