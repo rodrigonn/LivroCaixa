@@ -57,12 +57,18 @@
 
 			#controller-list ul {
 				list-style-position: inside;
+				text-decoration: none;
 			}
 
 			#controller-list li {
 				line-height: 1.3;
 				list-style-position: inside;
 				margin: 0.25em 0;
+				list-style-type: none;
+				display:block;
+				float: left;
+				margin: 30px;
+				text-decoration: none;
 			}
 
 			@media screen and (max-width: 480px) {
