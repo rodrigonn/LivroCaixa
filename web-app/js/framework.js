@@ -1,22 +1,23 @@
-//Defaults
-$.datepicker.setDefaults( $.datepicker.regional[ "pt-BR" ] );
+//Defaults TODO datepicket ainda está com locale americano
+$.datepicker.setDefaults($.datepicker.regional["pt-BR"]);
 
 // Mapas de configuração
 
-window.tipo2widgetFunc = {}
-window.tipo2setFunc = {}
-window.coluna2widget = {}
-window.entidade2colunas = {}
+window.tipo2widgetFunc = {};
+window.tipo2setFunc = {};
+window.entidade = null;
+window.colunas = [];
+window.linhaEditavel = null;
 
 registrarTipos();
 
 function registrarTipos() {
 	window.tipo2widgetFunc['number'] = criarNumber;
 	window.tipo2setFunc['number'] = text2Value;
-	
+
 	window.tipo2widgetFunc['text'] = criarText;
 	window.tipo2setFunc['text'] = text2Value;
-	
+
 	window.tipo2widgetFunc['date'] = criarDatePicker;
 	window.tipo2setFunc['data'] = text2Value;
 }
@@ -26,138 +27,234 @@ function text2Value(elemento, text) {
 }
 
 function criarNumber(idCampo, valor) {
-	return $('<input type="number">', {
-		name: idCampo,
-		id: idCampo,
-		step: "0.01",
-		value: valor
+	return $('<input type="number" >', {
+		id : idCampo,
+		name : idCampo,
+		value : valor
 	});
 }
 
 function criarText(idCampo, valor) {
-	return $('<input type="text">', {
-		name: idCampo,
-		id: idCampo,
-		value: valor
+	return $('<input type="text" >', {
+		id : idCampo,
+		name : idCampo,
+		value : valor
 	});
 }
 
 function criarDatePicker(idCampo, valor) {
-	var input = $('<input type="text">', {
-		name: idCampo,
-		id: idCampo,
-		value: valor
+	var input = $('<input type="text" >', {
+		id : idCampo,
+		name : idCampo,
+		value : valor
 	});
-	
 	input.datepicker();
-	
 	return input;
 }
 
+function criarSelectAjax(idCampo, valor) {
+	var select = $('<select>', {
+		name : idCampo,
+		id : idCampo
+	});
 
-function instanciarWidget(tipo, id, valor) {
-	return window.tipo2widgetFunc[tipo](id, valor)
+	jQuery.ajax({
+		type : 'GET',
+		url : link,
+		success : function(data, textStatus) {
+			var jsonArray = eval(data);
+
+			for ( var i = 0; i < jsonArray.length; i++) {
+				var valor = null;// TODO
+				var descricao = null;
+				var option = $('<option value="' + valor + '">' + descricao
+						+ '</option>');
+				select.append(option);
+			}
+
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) {
+		}
+	});
+
+	return select;
 }
 
 function cadastrarEntidade(entidade) {
-	window.entidade2colunas[entidade] = [];	
+	window.entidade = entidade;
 }
 
-function cadastrarColuna(entidade, nomeColuna, tipoColuna, valorDefaultColuna) {
-	window.entidade2colunas[entidade].push([nomeColuna, tipoColuna, valorDefaultColuna]);
-	window.coluna2widget[nomeColuna] = instanciarWidget(tipoColuna, nomeColuna, valorDefaultColuna) // TODO tirar isso daqui
+function cadastrarColuna(nomeColuna, tipoColuna, valorDefaultColuna) {
+	window.colunas.push([ nomeColuna, tipoColuna, valorDefaultColuna ]);
 }
-
 
 // Eventos
 
-function bindNovo(entidade, colunas) { //TODO Usar list-entidade
-	$("body").bind('keypress', function(event){
-		if (event.charCode == 110 && event.altKey) { // Alt + n
+function tratarTeclado(event) {
+	
+	if (event.keyCode == 13) {
+		if (window.linhaEditavel == null) {
 			var tr = $('<tr id="listagem0">');
-			for (var i = 0; i < colunas; i++) {
+			for ( var i = 0; i < window.colunas.length; i++) {
 				$('<td>').appendTo(tr);
 			}
 			
-			$("#listagem").append(tr);
-			habilitaEdicaoLinha(entidade, 0);
+			$("#list-" + window.entidade + " table tbody").append(tr);
+			window.linhaEditavel = "0";
+			habilitaEdicaoLinha(tr);
+		} else {
+			salvarAjax(tr, getLink(window.entidade));
+		}
+	}	
+}
+
+function getLink(id) {
+	if (id == "0") {
+		return "/ajax/" + window.entidade + "/";
+	} else {
+		return "/ajax/" + window.entidade + "/" + id;
+	}			
+}
+
+function bindNovo() {
+	$("body").live('keypress', function(event) {
+		tratarTeclado(event);
+	});
+}
+
+function bindEdicaoLinha(id) {
+	var tr = $("#listagem" + id);
+	bindEdicaoLinhaTr(tr);
+}
+
+function bindEdicaoLinhaTr(tr) {
+	tr.live('click', function() {
+		if (window.linhaEditavel == null){
+			habilitaEdicaoLinha($(this));
 		}
 	});
 }
 
-function bindEdicaoLinha(entidade, id) {
-	var handler = function () {
-		habilitaEdicaoLinha(entidade, id, handler)
-	};
-					
-	$("#listagem" + id).bind('click', handler);	
-}
+function habilitaEdicaoLinha(tr) {
+	var quantColunas = window.colunas.length;
+	var id = tr.attr('id').replace("listagem", "");
+	
+	var novoTr = $('<tr id="listagem' + id + '">');
 
-function habilitaEdicaoLinha(entidade, id, handler) {
-	var tr = $("#listagem" + id);
 	
-	var colunas = window.entidade2colunas[entidade];
-	
-	for (var i = 1; i <= colunas.length; i++) {
-		habilitaEditar(tr.children("td:nth-child(" + i + ")"), colunas[i-1][0]);		
+	for ( var i = 1; i <= quantColunas; i++) {
+		var td = habilitaEditar(tr.children("td:nth-child(" + i + ")"),
+				window.colunas[i - 1]);
+		novoTr.append(td);
+	}
+
+	var link = getLink(id);
+	var td = $('<td>');
+
+	if (id != "0") {
+		td.append($('<a href="#" onclick="excluirAvoAjax($(this), ' + link + ')">Excluir</a>'));
+		td.append(" ");
 	}
 	
-	if (handler)
-		tr.unbind('click', handler);
+	td.append($('<a href="#" onclick="cancelar($(this))">Cancelar</a>'));
+	novoTr.append(td);
+	tr.after(novoTr);
 	
-	var link = null;
-	if (id && id > 0){
-		link = "/LivroCaixa/exemplo/" + id
-	}else{
-		link = "/LivroCaixa/exemplo"	
+	
+	if (id == "0") {
+		tr.remove();		
+	} else {
+		tr.hide();
+		tr.attr("id", tr.attr("id") + "oculto");
 	}
-	
-	$("<a href='#' onclick='salvarAjax($(this), " + link + ")'>Salvar</a>")
-		.appendTo(tr.children("td:nth-child(4)"))
-		
-	tr.children("td:nth-child(4)").append(" ");
-
-	$('<a href="#" onclick="excluirAvoAjax($(this), ' + link + ')">Excluir</a>')
-		.appendTo(tr.children("td:nth-child(4)"))
 }
 
-function habilitaEditar(elemento, idCampo) {
+function desabilitaEdicaoLinha(tr, manter) {
+	var quantColunas = window.colunas.length;
+	var id = tr.attr('id').replace("listagem", "");
+	
+	if (manter) {
+		var novoTr = $('<tr id="listagem' + id + '">');
+
+		for ( var i = 1; i <= quantColunas; i++) {
+			var td = desabilitaEditar(tr.children("td:nth-child(" + i + ")"),
+					window.colunas[i - 1]);
+			novoTr.append(td);
+		}
+
+		var link = getLink(id);
+		var td = $('<td>');
+
+		novoTr.append(td);
+		tr.after(novoTr);
+		bindEdicaoLinhaTr(novoTr);		
+	} else {
+		var trOculto = $('#listagem' + id + 'oculto');
+		trOculto.show();
+		bindEdicaoLinhaTr(trOculto);
+		trOculto.attr("id", 'listagem' + id);
+	}
+
+	tr.remove();
+}
+
+function habilitaEditar(elemento, coluna) {
 	var valor = elemento.text();
-	var widget = window.coluna2widget[idCampo];
+	if (valor == null) {
+		valor = coluna[2];
+	}
+
+	var widget = window.tipo2widgetFunc[coluna[1]](coluna[0], valor);
 	widget.val(valor);
-	elemento.empty();
-	elemento.append(widget);
+
+	var td = $('<td>');
+	td.append(widget);
+	return td;
 }
 
 function desabilitaEditar(elemento) {
-	var valor = elemento.val()
-    elemento.html( valor );
+	var valor = elemento.children("input:nth-child(1)").val();
+	var td = $('<td>');
+	td.html(valor);
+	return td;
 }
 
 function excluirAvoAjax(elemento, link) {
 	jQuery.ajax({
-		type:'POST', 
-		url:link,
-		success:function(data,textStatus){
+		type : 'POST',
+		url : link,
+		success : function(data, textStatus) {
 			elemento.parent().parent().remove();
+			window.linhaEditavel = null;
 		},
-		error:function(
-			XMLHttpRequest,textStatus,errorThrown){}
-		});
+		error : function(XMLHttpRequest, textStatus, errorThrown) {
+		}
+	});
 	return false;
 }
 
 function salvarAjax(elemento, link) {
 	jQuery.ajax({
-		type:'POST', 
-		url:link,
-		success:function(data,textStatus){
-			elemento.parent().parent().children().each(function(){
-					desabilitaEditar($(this));	
-			})
+		type : 'POST',
+		url : link,
+		success : function(data, textStatus) {
+			desabilitaEdicaoLinha(elemento.parent().parent(), true);
+			window.linhaEditavel = null;
 		},
-		error:function(
-			XMLHttpRequest,textStatus,errorThrown){}
-		});
+		error : function(XMLHttpRequest, textStatus, errorThrown) {
+		}
+	});
 	return false;
+}
+
+function cancelar(elemento) {
+	var tr = elemento.parent().parent();
+	
+	if (tr.attr("id") == "listagem0") {
+		tr.remove();
+		
+	} else {
+		desabilitaEdicaoLinha(tr, false);
+	}
+	window.linhaEditavel = null;
 }

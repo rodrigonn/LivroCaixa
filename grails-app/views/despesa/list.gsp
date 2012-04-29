@@ -41,9 +41,9 @@
 						<th>Opções</th>
 					</tr>
 				</thead>
-				<tbody id="listagem">
+				<tbody>
 				<g:each in="${despesaInstanceList}" status="i" var="despesaInstance">
-					<tr  id="listagem${despesaInstance.id}" class="${(i % 2) == 0 ? 'even' : 'odd'}">
+					<tr id="listagem${despesaInstance.id}" class="${(i % 2) == 0 ? 'even' : 'odd'}">
 					
 						<td><g:link action="show" id="${despesaInstance.id}">${fieldValue(bean: despesaInstance, field: "tipoDespesa")}</g:link></td>
 					
@@ -51,20 +51,13 @@
 					
 						<td><g:formatDate date="${despesaInstance.data}" /></td>
 						<td></td>
+					<script>
+						bindEdicaoLinha(${despesaInstance.id});
+					</script>
 					</tr>
-					
-				<script>
-					bindEdicaoLinha('despesa', ${despesaInstance.id});
-				</script>
 				
 				</g:each>
 				</tbody>
-
-				<script>
-					bindNovo('despesa', 4);
-				</script>
-				
-			
 			</table>
 			<div class="pagination">
 				<g:paginate total="${despesaInstanceTotal}" />
