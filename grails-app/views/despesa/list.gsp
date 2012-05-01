@@ -20,9 +20,6 @@
 			</ul>
 		</div>
 
-		<g:javascript src="framework.js" />
-		<g:javascript src="despesa.js" />
-
 		<div id="list-despesa" class="content scaffold-list" role="main">
 			<h1><g:message code="default.list.label" args="[entityName]" /></h1>
 			<g:if test="${flash.message}">
@@ -41,27 +38,17 @@
 						<th>Opções</th>
 					</tr>
 				</thead>
-				<tbody>
-				<g:each in="${despesaInstanceList}" status="i" var="despesaInstance">
-					<tr id="listagem${despesaInstance.id}" class="${(i % 2) == 0 ? 'even' : 'odd'}">
-					
-						<td><g:link action="show" id="${despesaInstance.id}">${fieldValue(bean: despesaInstance, field: "tipoDespesa")}</g:link></td>
-					
-						<td>${fieldValue(bean: despesaInstance, field: "valor")}</td>
-					
-						<td><g:formatDate date="${despesaInstance.data}" /></td>
-						<td></td>
-					<script>
-						bindEdicaoLinha(${despesaInstance.id});
-					</script>
-					</tr>
 				
-				</g:each>
-				</tbody>
+				<tbody> </tbody>
+				
 			</table>
 			<div class="pagination">
 				<g:paginate total="${despesaInstanceTotal}" />
 			</div>
 		</div>
+		<g:javascript src="eventos.js" />
+		<g:javascript src="tipos.js" />
+		<g:javascript src="framework.js" />
+		<g:javascript src="despesa.js" />
 	</body>
 </html>

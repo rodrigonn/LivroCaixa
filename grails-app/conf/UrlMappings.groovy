@@ -7,11 +7,15 @@ class UrlMappings {
 			}
 		}
 
-		"/ajax/$controller/$id?"{
-			constraints {
-			}
-		}
-
+//		"/ajax/$controller/$id?"{
+//			constraints {
+//			}
+//		}
+		
+		"/ajax/despesa/$id?"(resource:"despesa")
+		
+		"/ajax/tipodespesa/$id?"(resource:"tipoDespesa")
+		
 		"/"(view:"/index")
 		"500"(view:'/error')
 	}

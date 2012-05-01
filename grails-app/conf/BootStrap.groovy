@@ -1,21 +1,28 @@
+import grails.converters.JSON;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import livrocaixa.*
 
 class BootStrap {
 
     def init = { servletContext ->
 
-		//definindo Cliente
+		//definindo Cliente padrão
 		def cliente = Cliente.findByNome('Padrão') ?:new Cliente(nome:'Padrão', cpfCnpj:'771.733.543-31').save(failOnError: true)
 
-//		//definindo Fornecedor
-//		def fornecedor = Fornecedor.findByNome('Poty') ?:new Fornecedor(nome:'Poty').save(failOnError: true)
-//		
-//		//definindo Fornecedor
-//		def produto1 = Produto.findByNome('Cimento') ?:new Produto(nome:'Cimento', tipo:'I', fornecedor: fornecedor).save(failOnError: true)
-//		
-//		//definindo TipoDespesa
-//		def tipoDespesa = TipoDespesa.findByNome('Folha de pagamento') ?:new TipoDespesa(nome:'Folha de pagamento').save(failOnError: true)
-		
+		DateFormat df = new SimpleDateFormat("dd/MM/yyyy", new Locale("pt", "BR"))
+
+		JSON.registerObjectMarshaller(Despesa) {
+			def returnArray = [:]
+			returnArray['id'] = it.id
+			returnArray['tipoDespesaNome'] = it.tipoDespesa.nome
+			returnArray['tipoDespesaId'] = it.tipoDespesa.id
+			returnArray['data'] = df.format(it.data)
+			returnArray['valor'] = it.valor
+			return returnArray
+		}
     }
     def destroy = {
     }

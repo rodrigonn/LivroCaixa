@@ -23,7 +23,7 @@ class DespesaControllerTests {
 
     void testList() {
 
-        def model = controller.list()
+        def model = controller.listagem()
 
         assert model.despesaInstanceList.size() == 0
         assert model.despesaInstanceTotal == 0

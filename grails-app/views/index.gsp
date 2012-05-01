@@ -92,7 +92,7 @@
 			<div id="controller-list" role="navigation">
 				<ul>
 					<g:each var="c" in="${grailsApplication.controllerClasses.sort { it.name } }">
-						<li class="controller"><g:link controller="${c.logicalPropertyName}">${c.name}</g:link></li>
+						<li class="controller"><g:link controller="${c.logicalPropertyName}" action="index">${c.name}</g:link></li>
 					</g:each>
 				</ul>
 			</div>
