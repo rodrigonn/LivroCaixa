@@ -77,7 +77,12 @@ function criarDatePicker(tdNovo, tdAntigo, coluna) {
 		name : coluna[0],
 		value : valor
 	});
-	input.datepicker();
+	input.datepicker( { 
+		dateFormat: "dd/mm/yy",
+		defaultDate: 0
+	});
+	
+	input.datepicker($.datepicker.regional['pt-BR']);
 	
 	input.val(valor);
 	tdNovo.append(input);

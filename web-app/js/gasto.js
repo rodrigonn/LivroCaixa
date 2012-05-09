@@ -1,5 +1,5 @@
-cadastrarEntidade('despesa', 'livrocaixa.Despesa');
-cadastrarColunaSelect('tipoDespesa', 'nomeid', 'tipodespesa');
+cadastrarEntidade('gasto', 'livrocaixa.Gasto');
+cadastrarColunaSelect('tipoGasto', 'nomeid', 'tipogasto');
 cadastrarColuna('valor', 'number', '0');
 cadastrarColuna('data', 'date', '');
 registrarTipos();

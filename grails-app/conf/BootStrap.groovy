@@ -14,11 +14,11 @@ class BootStrap {
 
 		DateFormat df = new SimpleDateFormat("dd/MM/yyyy", new Locale("pt", "BR"))
 
-		JSON.registerObjectMarshaller(Despesa) {
+		JSON.registerObjectMarshaller(Gasto) {
 			def returnArray = [:]
 			returnArray['id'] = it.id
-			returnArray['tipoDespesaNome'] = it.tipoDespesa.nome
-			returnArray['tipoDespesaId'] = it.tipoDespesa.id
+			returnArray['tipoGastoNome'] = it.tipoGasto.nome
+			returnArray['tipoGastoId'] = it.tipoGasto.id
 			returnArray['data'] = df.format(it.data)
 			returnArray['valor'] = it.valor
 			return returnArray

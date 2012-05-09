@@ -1,10 +1,10 @@
 
-<%@ page import="livrocaixa.Despesa" %>
+<%@ page import="livrocaixa.Gasto" %>
 <!doctype html>
 <html>
 	<head>
 		<meta name="layout" content="main">
-		<g:set var="entityName" value="${message(code: 'despesa.label', default: 'Despesa')}" />
+		<g:set var="entityName" value="${message(code: 'gasto.label', default: 'Gasto')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>
 	    <r:require module="jquery-ui"/>
 	
@@ -12,7 +12,7 @@
 	</head>
 	<body>
 	
-		<a href="#list-despesa" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
+		<a href="#list-gasto" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
@@ -20,7 +20,7 @@
 			</ul>
 		</div>
 
-		<div id="list-despesa" class="content scaffold-list" role="main">
+		<div id="list-gasto" class="content scaffold-list" role="main">
 			<h1><g:message code="default.list.label" args="[entityName]" /></h1>
 			<g:if test="${flash.message}">
 			<div class="message" role="status">${flash.message}</div>
@@ -29,11 +29,11 @@
 				<thead>
 					<tr>
 					
-						<th><g:message code="despesa.tipoDespesa.label" default="Tipo Despesa" /></th>
+						<th><g:message code="gasto.tipoGasto.label" default="Tipo Gasto" /></th>
 					
-						<g:sortableColumn property="valor" title="${message(code: 'despesa.valor.label', default: 'Valor')}" />
+						<g:sortableColumn property="valor" title="${message(code: 'gasto.valor.label', default: 'Valor')}" />
 					
-						<g:sortableColumn property="data" title="${message(code: 'despesa.data.label', default: 'Data')}" />
+						<g:sortableColumn property="data" title="${message(code: 'gasto.data.label', default: 'Data')}" />
 					
 						<th>Opções</th>
 					</tr>
@@ -43,12 +43,12 @@
 				
 			</table>
 			<div class="pagination">
-				<g:paginate total="${despesaInstanceTotal}" />
+				<g:paginate total="${gastoInstanceTotal}" />
 			</div>
 		</div>
 		<g:javascript src="eventos.js" />
 		<g:javascript src="tipos.js" />
 		<g:javascript src="framework.js" />
-		<g:javascript src="despesa.js" />
+		<g:javascript src="gasto.js" />
 	</body>
 </html>

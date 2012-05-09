@@ -2,16 +2,16 @@ package livrocaixa
 
 import grails.converters.JSON
 
-class TipoDespesaController {
+class TipoGastoController {
 
     def scaffold = true
 	
 	def show = {
 		if(params.id) {
-			render TipoDespesa.get(params.int('id')) as JSON
+			render TipoGasto.get(params.int('id')) as JSON
 		} else {
 			params.max = Math.min(params.max ? params.int('max') : 10, 100)
-			render TipoDespesa.list(params) as JSON
+			render TipoGasto.list(params) as JSON
 		}
 	}
 

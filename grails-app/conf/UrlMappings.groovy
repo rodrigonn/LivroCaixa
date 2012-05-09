@@ -12,9 +12,9 @@ class UrlMappings {
 //			}
 //		}
 		
-		"/ajax/despesa/$id?"(resource:"despesa")
+		"/ajax/gasto/$id?"(resource:"gasto")
 		
-		"/ajax/tipodespesa/$id?"(resource:"tipoDespesa")
+		"/ajax/tipogasto/$id?"(resource:"tipoGasto")
 		
 		"/"(view:"/index")
 		"500"(view:'/error')

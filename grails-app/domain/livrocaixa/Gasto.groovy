@@ -1,18 +1,18 @@
 package livrocaixa
 
-class Despesa {
+class Gasto {
 
-	TipoDespesa tipoDespesa
+	TipoGasto tipoGasto
 	Date data = new Date()
 	Double valor
 	
     static constraints = {
-		tipoDespesa(nullable: false)
+		tipoGasto(nullable: false)
 		valor(scale:2)
 		data(nullable: false)
     }
 	
 	String toString() {
-		return "${tipoDespesa}"
+		return "${tipoGasto}"
 	}
 }
