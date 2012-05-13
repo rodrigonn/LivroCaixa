@@ -1,7 +1,11 @@
 cadastrarEntidade('gasto', 'livrocaixa.Gasto');
-cadastrarColunaSelect('tipoGasto', 'nomeid', 'tipogasto');
-cadastrarColuna('valor', 'number', '0');
-cadastrarColuna('data', 'date', '');
 registrarTipos();
+
+cadastrarColuna('tipoGasto', 'Hierarquia', {
+	url: "/LivroCaixa/ajax/tipogasto/porNome"
+});
+cadastrarColuna('valor', 'Number');
+cadastrarColuna('data', 'Date');
+
 bindNovo();
 carregarListagem();

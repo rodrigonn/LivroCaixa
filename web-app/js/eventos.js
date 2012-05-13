@@ -100,7 +100,7 @@ function montarJSON(tr) {
 	for ( var i = 1; i <= quantColunas; i++) {
 		var coluna = window.colunas[i - 1];
 		var td = tr.children("td:nth-child(" + i + ")");
-		json += window.tipo2extrairJsonFunc[coluna[1]](td, coluna);		
+		json += coluna.extrairJson(td, coluna);
 	}
 	json += "\"class\" : \"" + window.classe + "\" }";
 	return jQuery.parseJSON(json);

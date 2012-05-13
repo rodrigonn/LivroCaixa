@@ -1,4 +1,3 @@
-// Defaults TODO datepicket ainda está com locale americano
 $.datepicker.setDefaults($.datepicker.regional[""]);
 
 /* Brazilian initialisation for the jQuery UI date picker plugin. */
@@ -36,12 +35,17 @@ function cadastrarEntidade(entidade, classe) {
 	window.classe = classe;
 }
 
-function cadastrarColuna(nomeColuna, tipoColuna, valorDefaultColuna) {
-	window.colunas.push([ nomeColuna, tipoColuna, valorDefaultColuna ]);
-}
-
-function cadastrarColunaSelect(nomeColuna, tipoColuna, chaveRest) {
-	window.colunas.push([ nomeColuna, tipoColuna, "/LivroCaixa/ajax/" + chaveRest ]);
+function cadastrarColuna(nomeColuna, tipoColuna, objColuna) {
+	if (objColuna == null) {
+		objColuna = new Object();
+	}
+	
+	window.colunas.push(objColuna);
+	var objTipo = window["tipo" + tipoColuna];
+	objColuna.nome = nomeColuna;
+	objColuna.habilitarEditar = objTipo.habilitarEditar;
+	objColuna.extrairJson = objTipo.extrairJson;
+	objColuna.extrairCelula = objTipo.extrairCelula;
 }
 
 function carregarListagem() {
@@ -69,9 +73,8 @@ function desenharLinha(item) {
 
 function extrairCelula(json, coluna) {
 	var td = $("<td>");
-	var tipoColuna = coluna[1];
-	var func = window.tipo2extrairCelulaFunc[tipoColuna];
-	func(td, json, coluna[0]);
+	var tipoColuna = coluna.tipo;
+	coluna.extrairCelula(td, json, coluna);
 	return td;
 }
 
