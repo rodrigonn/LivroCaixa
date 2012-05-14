@@ -72,4 +72,7 @@ class GastoController {
 			"""
 		}
 	}
+	
+	def relatorioDER = {
+	}
 }

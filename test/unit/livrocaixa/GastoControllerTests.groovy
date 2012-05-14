@@ -3,7 +3,7 @@ package livrocaixa
 
 
 @TestFor(GastoController)
-@Mock(Gasto)
+@Mock(Gasto) 
 class GastoControllerTests {
 
 

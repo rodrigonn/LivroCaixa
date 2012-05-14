@@ -1,4 +1,5 @@
 window.linhaEditavel = null;
+bindNovo();
 
 function bindNovo() {
 	$("body").live('keypress', function(event) {
@@ -18,7 +19,6 @@ function tratarTeclado(event) {
 			$("#list-" + window.entidade + " table tbody").append(tr);
 			window.linhaEditavel = "0";
 			habilitaEdicaoLinha(tr);
-
 		} else {
 			var tr = $('#listagem' + window.linhaEditavel);
 			salvarAjax(tr, getLink(window.linhaEditavel));
@@ -100,7 +100,7 @@ function montarJSON(tr) {
 	for ( var i = 1; i <= quantColunas; i++) {
 		var coluna = window.colunas[i - 1];
 		var td = tr.children("td:nth-child(" + i + ")");
-		json += coluna.extrairJson(td, coluna);
+		json += coluna.edicao2json(td, coluna);
 	}
 	json += "\"class\" : \"" + window.classe + "\" }";
 	return jQuery.parseJSON(json);

@@ -1,33 +1,35 @@
+registrarTipos();
+
 function registrarTipos() {
 
 	window.tipoNumber = {
-		habilitarEditar : criarNumber,
-		extrairJson : getInputValue,
-		extrairCelula : getAttributeValue
+		plano2edicao : criarNumber,
+		edicao2json : getInputValue,
+		json2plano : getAttributeValue
 	}
 
 	window.tipoText = {
-		habilitarEditar : criarText,
-		extrairJson : getInputValue,
-		extrairCelula : getAttributeValue
+		plano2edicao : criarText,
+		edicao2json : getInputValue,
+		json2plano : getAttributeValue
 	}
 
 	window.tipoDate = {
-		habilitarEditar : criarDatePicker,
-		extrairJson : getInputValue,
-		extrairCelula : getAttributeValue
+		plano2edicao : criarDatePicker,
+		edicao2json : getInputValue,
+		json2plano : getAttributeValue
 	}
 
 	window.tipoSelectNomeId = {
-		habilitarEditar : criarSelectAjax,
-		extrairJson : getSelectValue,
-		extrairCelula : getNomeId
+		plano2edicao : criarSelectAjax,
+		edicao2json : getSelectValue,
+		json2plano : getNomeId
 	}
 
 	window.tipoHierarquia = {
-		habilitarEditar : criarAutocompleteAjax, // plano2edicao
-		extrairJson : getInputValueId, // edicao2json
-		extrairCelula : getNomeId // json2plano
+		plano2edicao : criarAutocompleteAjax, // plano2edicao
+		edicao2json : getInputValueId, // edicao2json
+		json2plano : getNomeId // json2plano
 	}
 
 }
@@ -61,7 +63,7 @@ function getNomeId(td, mapa, coluna) {
 	td.append(nome);
 }
 
-function criarNumber(tdNovo, tdAntigo, coluna) {
+function criarNumber(tdNovo, tdAntigo, coluna, indice) {
 	var valor = tdAntigo.text();
 
 	var input = $('<input type="number" >', {
@@ -72,9 +74,10 @@ function criarNumber(tdNovo, tdAntigo, coluna) {
 
 	input.val(valor);
 	tdNovo.append(input);
+	focus(input, indice);
 }
 
-function criarText(tdNovo, tdAntigo, coluna) {
+function criarText(tdNovo, tdAntigo, coluna, indice) {
 	var valor = tdAntigo.text();
 
 	var input = $('<input type="text" >', {
@@ -85,9 +88,10 @@ function criarText(tdNovo, tdAntigo, coluna) {
 
 	input.val(valor);
 	tdNovo.append(input);
+	focus(input, indice);
 }
 
-function criarDatePicker(tdNovo, tdAntigo, coluna) {
+function criarDatePicker(tdNovo, tdAntigo, coluna, indice) {
 	var valor = tdAntigo.text();
 
 	var input = $('<input type="text" >', {
@@ -104,9 +108,10 @@ function criarDatePicker(tdNovo, tdAntigo, coluna) {
 
 	input.val(valor);
 	tdNovo.append(input);
+	focus(input, indice);
 }
 
-function criarAutocompleteAjax(tdNovo, tdAntigo, coluna) {
+function criarAutocompleteAjax(tdNovo, tdAntigo, coluna, indice) {
 	var valor = tdAntigo.children("input:nth-child(1)").val();
 	var descricao = tdAntigo.text();
 
@@ -151,9 +156,10 @@ function criarAutocompleteAjax(tdNovo, tdAntigo, coluna) {
 	});
 
 	tdNovo.append(input);
+	focus(input, indice);
 }
 
-function criarSelectAjax(tdNovo, tdAntigo, coluna) {
+function criarSelectAjax(tdNovo, tdAntigo, coluna, indice) {
 	var select = $('<select>', {
 		name : coluna.nome,
 		id : coluna.nome
@@ -175,6 +181,15 @@ function criarSelectAjax(tdNovo, tdAntigo, coluna) {
 	});
 
 	tdNovo.append(select);
+	focus(select, indice);
+}
+
+function focus(elemento, indice) {
+	if (indice == 1) {
+		//TODO nao estah funcionando
+//		window.alert(elemento.html());
+		elemento.focus();
+	}	
 }
 
 function habilitaEdicaoLinha(tr) {
@@ -187,7 +202,7 @@ function habilitaEdicaoLinha(tr) {
 	for ( var i = 1; i <= quantColunas; i++) {
 		var td = $('<td>');
 		habilitaEditar(td, tr.children("td:nth-child(" + i + ")"),
-				window.colunas[i - 1]);
+				window.colunas[i - 1], i);
 		novoTr.append(td);
 	}
 
@@ -212,8 +227,8 @@ function habilitaEdicaoLinha(tr) {
 	}
 }
 
-function habilitaEditar(tdNovo, tdAntigo, coluna) {
-	coluna.habilitarEditar(tdNovo, tdAntigo, coluna);
+function habilitaEditar(tdNovo, tdAntigo, coluna, indice) {
+	coluna.plano2edicao(tdNovo, tdAntigo, coluna, indice);
 }
 
 function getId(tr) {

@@ -43,9 +43,9 @@ function cadastrarColuna(nomeColuna, tipoColuna, objColuna) {
 	window.colunas.push(objColuna);
 	var objTipo = window["tipo" + tipoColuna];
 	objColuna.nome = nomeColuna;
-	objColuna.habilitarEditar = objTipo.habilitarEditar;
-	objColuna.extrairJson = objTipo.extrairJson;
-	objColuna.extrairCelula = objTipo.extrairCelula;
+	objColuna.plano2edicao = objTipo.plano2edicao;
+	objColuna.edicao2json = objTipo.edicao2json;
+	objColuna.json2plano = objTipo.json2plano;
 }
 
 function carregarListagem() {
@@ -74,7 +74,7 @@ function desenharLinha(item) {
 function extrairCelula(json, coluna) {
 	var td = $("<td>");
 	var tipoColuna = coluna.tipo;
-	coluna.extrairCelula(td, json, coluna);
+	coluna.json2plano(td, json, coluna);
 	return td;
 }
 
