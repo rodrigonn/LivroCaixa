@@ -74,8 +74,6 @@ class GastoController {
 	}
 	
 	def relatorioDER = {
-		def grade = [meses:[]]
-		
 		def res = 
 			Gasto.executeQuery(
 				"select g.tipoGasto.id, g.tipoGasto.nome, " + 
@@ -84,28 +82,29 @@ class GastoController {
 				"group by YEAR(g.data), MONTH(g.data), g.tipoGasto.id " +
 				"order by YEAR(g.data), MONTH(g.data)")
 
+		ArvoreGradeGasto arvore = new ArvoreGradeGasto()
 
 		res.each {
-			processaLinha(grade, it)
+			arvore.adicionarCelula(it)
 		}		
 		
-		render grade as JSON
+		render arvore.getMapaGrade() as JSON
 	}
 	
-	def processaLinha(grade, linha) {
-		def idTipoGasto = linha[0]
-		def mes = "${linha[2]}/${linha[3]}"
-		
-		if (!grade.meses.contains(mes)) {
-			grade.meses.add(mes)
-		}
-		
-		if (grade[idTipoGasto]) {
-			//Já tem o mapa
-		} else {
-			grade[idTipoGasto] = [nome: linha[1]]
-		}
-		
-		grade[idTipoGasto][mes] = linha[4] 
-	}
+//	def processaLinha(grade, linha) {
+//		def idTipoGasto = linha[0]
+//		def mes = "${linha[2]}/${linha[3]}"
+//		
+//		if (!grade.meses.contains(mes)) {
+//			grade.meses.add(mes)
+//		}
+//		
+//		if (grade[idTipoGasto]) {
+//			//Já tem o mapa
+//		} else {
+//			grade[idTipoGasto] = [nome: linha[1]]
+//		}
+//		
+//		grade[idTipoGasto][mes] = linha[4] 
+//	}
 }
