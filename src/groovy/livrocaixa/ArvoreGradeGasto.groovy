@@ -2,7 +2,7 @@ package livrocaixa
 
 class ArvoreGradeGasto {
 
-	List<LinhaGradeGasto> raizes = new ArrayList<LinhaGradeGasto>()
+	LinhaGradeGasto total = new LinhaGradeGasto()
 	List<Mes> meses = new ArrayList<Mes>()
 	
 	def adicionarCelula(resultSet) {
@@ -19,7 +19,7 @@ class ArvoreGradeGasto {
 	}
 	
 	def getLinha(idTipoGasto) {
-		def linha = getLinhaPorId(idTipoGasto, raizes)
+		def linha = getLinhaPorId(idTipoGasto, total.filhas)
 		
 		if (!linha){ 
 			def tipo = TipoGasto.get(idTipoGasto)
@@ -57,7 +57,8 @@ class ArvoreGradeGasto {
 			linha.pai = linhaPai
 			
 		} else {
-			raizes.add(linha)
+			total.filhas.add(linha)
+			linha.pai = total
 		}
 		
 		linha
@@ -82,17 +83,22 @@ class ArvoreGradeGasto {
 	def getTipos() {
 		def lista = []
 		
-		raizes.each {
-			addTipos(lista, it, 1)
-		}
+		addTipos(lista, total, 1)
 		
 		lista
 	}
 	
 	def addTipos(lista, linha, nivel) {
 		
+		def nome = null
+		if (linha.tipo) {
+			nome = linha.tipo.nome
+		} else {
+			nome = "Total"
+		}
+		
 		def mapa = [
-			nome : linha.tipo.nome, 
+			nome : nome, 
 			nivel : nivel
 		]
 		
@@ -108,9 +114,7 @@ class ArvoreGradeGasto {
 	def getCelulas(tipos) {
 		def lista = []
 		
-		raizes.each {
-			addCelulas(lista, it)
-		}
+		addCelulas(lista, total)
 		
 		lista
 	}
@@ -119,8 +123,16 @@ class ArvoreGradeGasto {
 		def colunas = []
 		
 		meses.each {
-			def valor = linha.celulasMeses[it]
-			colunas.add(valor ?: 0.0)
+			def valorTotal = total.celulasMeses[it]
+			def valorCelula = linha.celulasMeses[it]
+			valorCelula = valorCelula ?: 0.0
+
+			def percentual = 0.0			
+			if (valorTotal > 0.0) {
+				percentual = 100 * (valorCelula / valorTotal)
+			} 
+			
+			colunas.add([valor: valorCelula, percentual: percentual])
 		}
 		
 		lista.add(colunas)

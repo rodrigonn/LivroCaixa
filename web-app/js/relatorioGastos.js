@@ -18,7 +18,7 @@ function montarCabecalho(table, colunas) {
 	tr.addClass("nivel0");
 	
 	$.each(colunas, function(i, coluna) {
-		tr.append("<td>" + coluna + "</td>");
+		tr.append("<td colspan='2'>" + coluna + "</td>");
 	});
 }
 
@@ -31,8 +31,10 @@ function montarLinhas(table, linhas, celulas) {
 		tr.addClass("nivel" + linha.nivel);
 		tr.append("<td>" + linha.nome + "</td>");
 
-		$.each(celulas[i], function(i, celula) {
-			tr.append("<td>" + celula.toFixed(2) + "</td>");			
+		$.each(celulas[i], function(i, tupla) {
+			tupla = eval(tupla);
+			tr.append("<td>" + tupla.valor.toFixed(2) + "</td>");			
+			tr.append("<td>" + tupla.percentual.toFixed(1) + "%</td>");			
 		});
 	}
 }
