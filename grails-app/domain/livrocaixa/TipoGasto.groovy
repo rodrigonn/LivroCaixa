@@ -1,5 +1,7 @@
 package livrocaixa
 
+import grails.gorm.DetachedCriteria
+
 class TipoGasto {
 
 	String nome

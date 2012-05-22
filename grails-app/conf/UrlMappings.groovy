@@ -12,6 +12,7 @@ class UrlMappings {
 //			}
 //		}
 		
+		"/ajax/gasto/relatorio" (controller:"gasto", action:"relatorio")
 		"/ajax/gasto/$id?"(resource:"gasto")
 		
 		"/ajax/tipogasto/porNome" (controller:"tipoGasto", action:"tipoPorNome")

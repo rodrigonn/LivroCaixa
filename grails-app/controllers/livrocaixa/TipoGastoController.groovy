@@ -19,15 +19,18 @@ class TipoGastoController {
 		def tipos = TipoGasto.findAllByNomeLike('%' + params.pesquisa + '%')
 
 		def lista = []
-		
+
 		for (tipo in tipos) {
-			def mapa = [
-				descricao: tipo.toString(), 
-				valor: tipo.nome,
-				id: tipo.id]
-			lista.add mapa
+
+			if (tipo.filhos.isEmpty()) {
+				def mapa = [
+							descricao: tipo.toString(),
+							valor: tipo.nome,
+							id: tipo.id]
+				lista.add mapa
+			}
 		}
-		
+
 		render lista as JSON
 	}
 }

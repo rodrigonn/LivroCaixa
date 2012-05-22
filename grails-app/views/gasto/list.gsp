@@ -6,17 +6,15 @@
 		<meta name="layout" content="main">
 		<g:set var="entityName" value="${message(code: 'gasto.label', default: 'Gasto')}" />
 		<title><g:message code="default.list.label" args="[entityName]" /></title>
-	    <r:require module="jquery-ui"/>
 	
 
 	</head>
 	<body>
-	
 		<a href="#list-gasto" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div class="nav" role="navigation">
 			<ul>
 				<li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
-				<li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
+				<li><a href="#" id="botaoCriar"><g:message code="default.new.label" args="[entityName]" /></a></li>
 			</ul>
 		</div>
 
@@ -46,9 +44,10 @@
 				<g:paginate total="${gastoInstanceTotal}" />
 			</div>
 		</div>
+		<g:javascript src="jquery.price_format.1.7.js" />
 		<g:javascript src="eventos.js" />
 		<g:javascript src="tipos.js" />
-		<g:javascript src="framework.js" />
+		<g:javascript src="nn2.js" />
 		<g:javascript src="gasto.js" />
 	</body>
 </html>

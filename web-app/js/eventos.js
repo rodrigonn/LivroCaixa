@@ -1,5 +1,10 @@
 window.linhaEditavel = null;
+
 bindNovo();
+
+$('#botaoCriar').click(function() {
+	novaLinha();
+});
 
 function bindNovo() {
 	$("body").live('keypress', function(event) {
@@ -11,14 +16,8 @@ function tratarTeclado(event) {
 	if (event.keyCode == 13) {
 
 		if (window.linhaEditavel == null) {
-			var tr = $('<tr id="listagem0">');
-			for ( var i = 0; i < window.colunas.length; i++) {
-				$('<td>').appendTo(tr);
-			}
-
-			$("#list-" + window.entidade + " table tbody").append(tr);
-			window.linhaEditavel = "0";
-			habilitaEdicaoLinha(tr);
+			novaLinha();
+			
 		} else {
 			var tr = $('#listagem' + window.linhaEditavel);
 			salvarAjax(tr, getLink(window.linhaEditavel));
@@ -26,22 +25,15 @@ function tratarTeclado(event) {
 	}
 }
 
-function bindEdicaoLinha(id) {
-	var tr = $("#listagem" + id);
-	bindEdicaoLinhaTr(tr);
-}
+function novaLinha() {
+	var tr = $('<tr id="listagem0">');
+	for ( var i = 0; i < window.colunas.length; i++) {
+		$('<td>').appendTo(tr);
+	}
 
-function bindEdicaoLinhaTr(tr) {
-	tr.live('click', function() {
-		
-		if (window.linhaEditavel == null ) {
-			habilitaEdicaoLinha($(this));
-		}
-		
-		if (window.linhaEditavel == "cancelado") { 
-			window.linhaEditavel = null;
-		}
-	});
+	$("#list-" + window.entidade + " table tbody").append(tr);
+	window.linhaEditavel = "0";
+	habilitaEdicaoLinha(tr);	
 }
 
 function excluirAvoAjax(elemento, link) {
@@ -49,8 +41,7 @@ function excluirAvoAjax(elemento, link) {
 		type : 'DELETE',
 		url : link,
 		success : function(data, textStatus) {
-			elemento.parent().parent().remove();
-			window.linhaEditavel = null;
+			carregarListagem();
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) {
 			window.alert(errorThrown);
@@ -75,17 +66,7 @@ function salvarAjax(tr, link) {
 		url : link,
 		data : dados,
 		success : function(data, textStatus) {
-			var trOculto = $("#" + tr.attr('id') + "oculto");
-			if (trOculto != null) {
-				trOculto.remove();
-			}
-			
-			var linha = eval(data);  
-			var trNovo = desenharLinha(linha);
-			tr.after(trNovo);
-			
-			tr.remove();
-			window.linhaEditavel = null;
+			carregarListagem();
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) {
 		}

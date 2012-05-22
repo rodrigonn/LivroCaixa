@@ -50,7 +50,8 @@ class GastoController {
 		if(params.id) {
 			render Gasto.get(params.int('id')) as JSON
 		} else {
-			params.max = Math.min(params.max ? params.int('max') : 10, 100)
+			def paramMax = params.max ? params.int('max') : 10
+			params.max = Math.min(paramMax ?: 10, 100)
 			render Gasto.list(params) as JSON
 		}
 	}
@@ -73,7 +74,11 @@ class GastoController {
 		}
 	}
 	
-	def relatorioDER = {
+	def relatorioGastos = {
+		
+	}
+	
+	def relatorio = {
 		def res = 
 			Gasto.executeQuery(
 				"select g.tipoGasto.id, g.tipoGasto.nome, " + 
@@ -90,21 +95,4 @@ class GastoController {
 		
 		render arvore.getMapaGrade() as JSON
 	}
-	
-//	def processaLinha(grade, linha) {
-//		def idTipoGasto = linha[0]
-//		def mes = "${linha[2]}/${linha[3]}"
-//		
-//		if (!grade.meses.contains(mes)) {
-//			grade.meses.add(mes)
-//		}
-//		
-//		if (grade[idTipoGasto]) {
-//			//Já tem o mapa
-//		} else {
-//			grade[idTipoGasto] = [nome: linha[1]]
-//		}
-//		
-//		grade[idTipoGasto][mes] = linha[4] 
-//	}
 }
