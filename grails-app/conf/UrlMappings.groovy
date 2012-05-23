@@ -17,6 +17,8 @@ class UrlMappings {
 		
 		"/ajax/tipogasto/porNome" (controller:"tipoGasto", action:"tipoPorNome")
 		"/ajax/tipogasto/$id?"(resource:"tipoGasto")
+
+		"/ajax/venda/$id?"(resource:"venda")
 		
 		"/"(view:"/index")
 		"500"(view:'/error')

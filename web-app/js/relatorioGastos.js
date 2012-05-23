@@ -13,12 +13,24 @@ function carregarRelatorio() {
 
 function montarCabecalho(table, colunas) {
 	var tr = $("<tr>");
+	var tr2 = $("<tr>");
 	table.append(tr);
+	table.append(tr2);
 	tr.append("<td>Tipo</td>");
 	tr.addClass("nivel0");
+	tr2.append("<td> </td>");
+	tr2.addClass("nivel4");
 	
 	$.each(colunas, function(i, coluna) {
-		tr.append("<td colspan='2'>" + coluna + "</td>");
+		var td = $("<td colspan='2'>" + coluna + "</td>");
+		td.css("text-align", "center");
+		tr.append(td);
+		var td2 = $("<td>R$</td>");
+		var td2b = $("<td>%</td>");
+		td2.css("text-align", "right");
+		td2b.css("text-align", "center");//TODO
+		tr2.append(td2);
+		tr2.append(td2b);
 	});
 }
 
@@ -33,7 +45,9 @@ function montarLinhas(table, linhas, celulas) {
 
 		$.each(celulas[i], function(i, tupla) {
 			tupla = eval(tupla);
-			tr.append("<td>" + tupla.valor.toFixed(2) + "</td>");			
+			var tdValor = $("<td>" + tupla.valor.toFixed(2) + "</td>"); 
+			tdValor.css("text-align", "right");
+			tr.append(tdValor);			
 			tr.append("<td>" + tupla.percentual.toFixed(1) + "%</td>");			
 		});
 	}

@@ -94,7 +94,7 @@ class ArvoreGradeGasto {
 		if (linha.tipo) {
 			nome = linha.tipo.nome
 		} else {
-			nome = "Total"
+			nome = "Custo/Despesas"
 		}
 		
 		def mapa = [

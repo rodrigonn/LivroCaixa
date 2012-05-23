@@ -13,6 +13,10 @@ class Venda {
 	String status
 	static hasMany = [itemVenda: ItemVenda]
 
+	def getValorTotal() {
+		return 10.0 //TODO
+	}
+	
     static constraints = {
 		numeroNotaFiscal(nullable:false,blank:false)
 		status(inList:["Em aberto", "Pago", "Atrasado", "Cancelado"])

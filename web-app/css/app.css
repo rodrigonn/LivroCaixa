@@ -3,29 +3,44 @@
 	background-color: orange;
 	font-weight: bold;
 	font-family: arial;
+	border-width: 2px;
+	border-style: double;
+	border-color: green;
 }
 
 .nivel1 {
 	font-size: 14px;
-	background-color: yellow;
-	font-weight: bold;
+	background-color: orange;
 	font-family: arial;
+	border-width: 1px;
+	border-color: green;
+	border-style: double;
 }
 
 .nivel2 {
 	font-size: 14px;
-	background-color: white;
+	background-color: yellow;
 	font-family: arial;
+	border-width: 1px;
+	border-color: green;
+	border-style: double;
 }
 
 .nivel3 {
 	font-size: 12px;
 	background-color: white;
 	font-family: arial;
+	border-width: 1px;
+	border-color: green;
+	border-style: double;
+	font-weight: bold;
 }
 
 .nivel4 {
-	font-size: 10px;
+	font-size: 12px;
 	background-color: white;
 	font-family: arial;
+	border-width: 1px;
+	border-color: green;
+	border-style: double;
 }
