@@ -1,13 +1,16 @@
 /* 
 --------------------------------
-Arquivo inicial do framework nn2
+Framework nn2 - NANUVEM para Web 2.0
 --------------------------------
 */
 
 
-/*
-Zerando o locale do datepicker e depois setando para pt-BR
-*/
+
+/* ---- 
+Trechos de código prontos obtidos da Web
+---- */
+
+//Zerando o locale do datepicker e depois setando para pt-BR
 $.datepicker.setDefaults($.datepicker.regional[""]);
 
 /* Brazilian initialisation for the jQuery UI date picker plugin. */
@@ -37,15 +40,10 @@ jQuery(function($) {
 	$.datepicker.setDefaults($.datepicker.regional['pt-BR']);
 });
 
-
-/*
-Extrai os parâmetros get da URL atual.
-
-TODO É usada para paginação com Ajax, mas talvez seja removida quando a
-paginação for alterada para usar o período.
-
-Obtida em http://jquery-howto.blogspot.com.br/2009/09/get-url-parameters-values-with-jquery.html
-*/
+//Extrai os parâmetros get da URL atual.
+//Obtida em http://jquery-howto.blogspot.com.br/2009/09/get-url-parameters-values-with-jquery.html
+//TODO É usada para paginação com Ajax, mas talvez seja removida quando a
+//paginação for alterada para usar o período.
 function getUrlVars() {
 	var vars = [], hash;
 	var hashes = window.location.href.slice(
@@ -58,44 +56,97 @@ function getUrlVars() {
 	return vars;
 }
 
-/*
-Dados de configuração global da página.
-Ver os métodos a seguir
-*/
+
+/* ----
+Código a ser executado no carregamento desse script
+---- */
+
+//Zerando os dados de configuração global da página
 window.entidade = null; 
 window.classe = null; 
-window.colunas = []; 
+window.colunas = [];
+window.instanciaEdicao = null;
 
-/*
-Cadastra o nome simples da entidade (ex. gasto) e 
-o pacote e nome da classe da entidade (ex. abc.gasto).
-*/
-function cadastrarEntidade(entidade, classe) {
-	window.entidade = entidade;
-	window.classe = classe;
+bindTeclado();
+
+//O clique em #botaoCriar cria uma nova instância
+$('#botaoCriar').click(function() {
+	novaInstancia();
+});
+
+
+/* ----
+Código independente de editor.
+---- */
+
+//Escuta os eventos de teclado na página de listagem
+function bindTeclado() {
+	$("body").live('keypress', function(event) {
+		
+		if (event.keyCode == 13) { //ENTER
+
+			//Se nenhuma linha está sendo editada, cria uma nova linha
+			if (window.instanciaEdicao == null) { 
+				novaInstancia();
+				
+			//Caso contrário, salva a linha que está sendo editada
+			} else {
+				salvarInstancia();
+			}
+		}
+	});
 }
 
-/*
-Adiciona uma configuração de coluna na entidade já cadastrada.
-Os tipos de coluna podem ser vistos em tipos.js.registrarTipos().
-O nome do tipo deve ser informado sem o prefixo "tipo", que será
-adicionado automaticamente.
-O mapa objColuna deve ser utilizado quando o tipo precisar de mais
-informações além do nome e tipo.
+//Abre a UI para inserção de uma nova instância
+//TODO esse ponto será generalizado no framework
+function novaInstancia() {
+	novaLinha();
+}
 
-As funções conversoras do tipo são copiados para o objColuna.
-*/
-function cadastrarColuna(nomeColuna, tipoColuna, objColuna) {
-	if (objColuna == null) {
-		objColuna = new Object();
+//Agrega os dados inseridos e envia o comando salvar (criar ou editar)
+//para o servidor. Reage à resposta do comando e atualiza a tela de listagem.
+function salvarInstancia() {
+	var tr = $('#listagem' + window.instanciaEdicao);
+	var link = getLink(window.instanciaEdicao);
+
+	var method = null;
+	if (window.instanciaEdicao == "0") {
+		method = 'POST';
+	} else {
+		method = 'PUT';
 	}
 
-	window.colunas.push(objColuna);
-	var objTipo = window["tipo" + tipoColuna];
-	objColuna.nome = nomeColuna;
-	objColuna.plano2edicao = objTipo.plano2edicao;
-	objColuna.edicao2json = objTipo.edicao2json;
-	objColuna.json2plano = objTipo.json2plano;
+	var dados = montarJSON(tr);
+
+	jQuery.ajax({
+		type : method,
+		url : link,
+		data : dados,
+		success : function(data, textStatus) {
+			carregarListagem();
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) {
+		}
+	});
+	return false;
+}
+
+//Monta a string json para ser enviada na criação e edição de instâncias
+function montarJSON(elemento) {
+	var json = '{';
+
+	var quantColunas = window.colunas.length;
+	for ( var i = 1; i <= quantColunas; i++) {
+		json += getAtributoValor(elemento, i);
+	}
+	json += "\"class\" : \"" + window.classe + "\" }";
+	return jQuery.parseJSON(json);
+}
+
+//Obtém o nome do i-ésimo atributo e o seu valor, para montar o JSON.
+//TODO esse ponto será generalizado no framework
+function getAtributoValor(elemento, i) {
+	return getAtributoValorCelulaEditavel(elemento, i);	
 }
 
 /*
@@ -106,7 +157,7 @@ O table da listagem precisa estar dentro de um div com o id list-nomeSimplesEnti
 Isso é gerado automaticamente pelo scaffold do Grails.
 */
 function carregarListagem() {
-	window.linhaEditavel = null;
+	window.instanciaEdicao = null;
 	$.getJSON(getLink(), {
 		offset : getUrlVars()["offset"],
 		max : getUrlVars()["max"]
@@ -149,17 +200,16 @@ function desenharLinha(item) {
 
 	for ( var i = 1; i <= window.colunas.length; i++) {
 		var td = json2plano(item, window.colunas[i - 1]);
-		tr.append(td);
+		if (td != null) {
+			tr.append(td);
+		}
 	}
 
 	bindEdicaoLinha(item.id);
 	return tr;
 }
 
-/*
-Extrai os dados, relativos a uma coluna, de um objeto JSON e
-gera uma célula (td).
-*/
+//Extrai os dados, relativos a uma coluna, de um objeto JSON e gera uma célula (td).
 function json2plano(json, coluna) {
 	var td = $("<td>");
 	var tipoColuna = coluna.tipo;
@@ -167,23 +217,78 @@ function json2plano(json, coluna) {
 	return td;
 }
 
-/*
-Cria e associa um handler para o click em uma linha (tr)
-que habilita a edição dos seus dados.
-Acha a linha cujo id é "listagem" + id
-*/
+//Cria e associa um handler para o click em uma linha (tr) que habilita a 
+//edição dos seus dados. Acha a linha cujo id é "listagem" + id
 function bindEdicaoLinha(id) {
 	var tr = $("#listagem" + id);
 	tr.live('click', function() {
 		
-		if (window.linhaEditavel == null ) {
-			habilitaEdicaoLinha($(this));
+		if (window.instanciaEdicao == null ) {
+			var tr = $(this);
+			var id = getId(tr);
+			window.instanciaEdicao = id;
+			
+			editarInstancia(tr);			
 		}
 		
-		if (window.linhaEditavel == "cancelado") { 
-			window.linhaEditavel = null;
+		//Gambiarra para o cancelar funcionar direito
+		if (window.instanciaEdicao == "cancelado") { 
+			window.instanciaEdicao = null;
 		}
 	});
+}
+
+
+//Obtem o id da instância relativa ao tr. 
+function getId(tr) {
+	return tr.attr('id').replace("listagem", "");
+}
+
+//Desenha a UI para edição de uma instância.
+//TODO esse ponto será generalizado no framework
+function editarInstancia(tr) {
+	editarInstanciaLinhaEditavel(tr, window.instanciaEdicao);
+	$("#edicao1").focus(); //Seta o foco no primeiro campo da edição
+}
+
+function excluirAjax(elemento, id) {
+	var link = getLink(id);
+	jQuery.ajax({
+		type : 'DELETE',
+		url : link,
+		success : function(data, textStatus) {
+			carregarListagem();
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) {
+			window.alert(errorThrown);
+		}
+	});
+	return false;
+}
+
+
+/* ----
+Código dependente do editor "LinhaEditavel"
+---- */
+
+//Desenha uma nova linha para inserção dos dados da nova instância
+function novaLinha() {
+	var tr = $('<tr id="listagem0">');
+	for ( var i = 0; i < window.colunas.length; i++) {
+		$('<td>').appendTo(tr);
+	}
+
+	$("#list-" + window.entidade + " table tbody").append(tr);
+	window.instanciaEdicao = "0";
+	editarInstancia(tr);	
+}
+
+//Obtém o nome do atributo e o seu valor, para montar o JSON,
+//a partir de uma célula de uma linha editável
+function getAtributoValorCelulaEditavel(tr, indice) {
+	var coluna = window.colunas[indice - 1];
+	var td = tr.children("td:nth-child(" + indice + ")");
+	return coluna.edicao2json(td, coluna);
 }
 
 /*
@@ -192,10 +297,7 @@ A linha informada será removida, se for uma nova linha. Se for uma linha
 já existente, será ocultada e terá seu id modificado.
 Também desenha a célula com as opções de cancelar e excluir.
 */
-function habilitaEdicaoLinha(tr) {
-	var id = getId(tr);
-	window.linhaEditavel = id;
-
+function editarInstanciaLinhaEditavel(tr, id) {
 	var novoTr = $('<tr id="listagem' + id + '">');
 	tr.after(novoTr);
 
@@ -207,16 +309,7 @@ function habilitaEdicaoLinha(tr) {
 	} else {
 		tr.hide();
 		tr.attr("id", tr.attr("id") + "oculto");
-	}
-
-	$("#edicao1").focus(); //Seta o foco na primeira célula da linha
-}
-
-/*
-Obtem o id da instância relativa ao tr. 
-*/
-function getId(tr) {
-	return tr.attr('id').replace("listagem", "");
+	}	
 }
 
 function desenhaCelulasEditaveis(novoTr, antigoTr) {
@@ -234,15 +327,68 @@ function desenhaCelulaEditavel(tdNovo, tdAntigo, coluna, indice) {
 }
 
 function desenhaCelulaOpcoes(tr, id) {
-	var link = getLink(id);
 	var td = $('<td>');
 
 	if (id != "0") {
-		td.append($('<a href="#" onclick="excluirAvoAjax($(this), \'' + link
+		td.append($('<a href="#" onclick="excluirAjax($(this), \'' + id
 				+ '\')">Excluir</a>'));
 		td.append(" ");
 	}
 
-	td.append($('<a href="#" onclick="cancelar($(this))">Cancelar</a>'));
+	td.append($('<a href="#" onclick="cancelarLinhaEditavel($(this))">Cancelar</a>'));
 	tr.append(td);	
 }
+
+function cancelarLinhaEditavel(elemento) {
+	var tr = elemento.parent().parent();
+
+	window.instanciaEdicao = "cancelado";
+	
+	if (tr.attr("id") == "listagem0") {
+		tr.remove();
+
+	} else {
+		var quantColunas = window.colunas.length;
+		var id = getId(tr);
+
+		var trOculto = $('#listagem' + id + 'oculto');
+		trOculto.show();
+		trOculto.attr("id", 'listagem' + id);
+		tr.remove();
+	}
+}
+
+
+/* ----
+Funções de configuração que são invocadas pelo cliente
+---- */
+
+//Cadastra o nome simples da entidade (ex. gasto) e 
+//o pacote e nome da classe da entidade (ex. abc.gasto).
+function cadastrarEntidade(entidade, classe) {
+	window.entidade = entidade;
+	window.classe = classe;
+}
+
+/*
+Adiciona uma configuração de coluna na entidade já cadastrada.
+Os tipos de coluna podem ser vistos em tipos.js.registrarTipos().
+O nome do tipo deve ser informado sem o prefixo "tipo", que será
+adicionado automaticamente.
+O mapa objColuna deve ser utilizado quando o tipo precisar de mais
+informações além do nome e tipo.
+As funções conversoras do tipo são copiados para o objColuna.
+*/
+function cadastrarColuna(nomeColuna, tipoColuna, objColuna) {
+	if (objColuna == null) {
+		objColuna = new Object();
+	}
+
+	window.colunas.push(objColuna);
+	var objTipo = window["tipo" + tipoColuna];
+	objColuna.nome = nomeColuna;
+	objColuna.plano2edicao = objTipo.plano2edicao;
+	objColuna.edicao2json = objTipo.edicao2json;
+	objColuna.json2plano = objTipo.json2plano;
+}
+

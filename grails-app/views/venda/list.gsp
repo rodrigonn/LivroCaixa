@@ -44,7 +44,6 @@
 			</div>
 		</div>
 		<g:javascript src="jquery.price_format.1.7.js" />
-		<g:javascript src="eventos.js" />
 		<g:javascript src="tipos.js" />
 		<g:javascript src="nn2.js" />
 		<g:javascript src="venda.js" />
