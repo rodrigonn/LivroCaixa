@@ -44,3 +44,35 @@
 	border-color: green;
 	border-style: double;
 }
+
+.campo {
+	margin: 6px;
+}
+
+.etiqueta {
+	margin: 4px;
+	text-align: right;
+}
+
+.tituloItens {
+	margin: 10px;
+	font-size: 12px;
+	border-width: 2px;
+	border-color: white;
+}
+
+.subTituloItens {
+	font-size: 12px;
+	border-color: white;
+}
+
+input.blur { color: #aaa; }
+
+.camposItem {
+	width:80px;
+	margin-left: 10px;
+}
+
+.vendaPopupLinhaItem {
+	
+}

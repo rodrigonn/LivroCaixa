@@ -1,9 +1,17 @@
-cadastrarEntidade('gasto', 'livrocaixa.Gasto');
+cadastrarEntidade('gasto', 'livrocaixa.Gasto', 'LinhaEditavel');
 
-cadastrarColuna('tipoGasto', 'Hierarquia', {
+cadastrarColuna('Hierarquia', {
+	nome: 'tipoGasto',
+	descricao: 'Tipo de Gasto',
 	url: "/LivroCaixa/ajax/tipogasto/porNome"
 });
-cadastrarColuna('valor', 'Moeda');
-cadastrarColuna('data', 'Date');
+cadastrarColuna('Moeda', {
+	nome: 'valor', 
+	descricao: 'Valor'
+});
+cadastrarColuna('Date', {
+	nome: 'data', 
+	descricao: 'Data', 
+});
 
-carregarListagem();
+inicializarPagina();

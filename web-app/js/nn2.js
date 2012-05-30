@@ -56,6 +56,135 @@ function getUrlVars() {
 	return vars;
 }
 
+/**
+* @author Remy Sharp, additions by nachokb
+* @url http://remysharp.com/2007/01/25/jquery-tutorial-text-box-hints/
+*/
+
+(function ($) {
+
+/* $d("....")
+ *
+ *  Easy access to jQuery's per-element data cache.
+ *
+ *  Examples
+ *
+ *    $d("#foo").age = 12
+ *    $d("#foo").age //=> 12
+ *    $d("#foo").age = $d("#foo").age + 1
+ *
+ *  Slightly adapted from http://yehudakatz.com/2009/04/20/evented-programming-with-jquery/ by Yehuda Katz.
+ */
+if (typeof($d) != "function") {
+  $d = function(param) {
+    var node = jQuery(param)[0];
+    var id   = jQuery.data(node);
+
+    jQuery.cache[id] || (jQuery.cache[id] = {});
+    jQuery.cache[id].node = node;
+
+    return jQuery.cache[id];
+  }
+}
+
+//Coloca dicas (hints) nos campos de formulários
+$.fn.hint = function (blurClass) {
+  if (!blurClass) { 
+    blurClass = 'blur';
+  }
+    
+  return this.each(function () {
+    // get jQuery version of 'this'
+    var $input = $(this),
+    
+    // capture the rest of the variable to allow for reuse
+      title = $input.attr('title'),
+      isPassword = $input.attr('type') == 'password',
+      $form = $(this.form),
+      $win = $(window);
+
+    var strategies = {
+      changeValue: {
+        init: function() {},
+        add: function() {
+          if ($input.val() === '') {
+            $input.addClass(blurClass)
+              .val(title);
+          }
+        },
+        remove: function() {
+          if ($input.val() === title && $input.hasClass(blurClass)) {
+            $input.val('')
+              .removeClass(blurClass);
+          }
+        },
+        submit: function() {
+          this.remove();
+        }
+      },
+
+      replaceElement: {
+        init: function() {
+          $input.addClass("replaced-for-title");
+
+          // create alternative text input element with title as value
+          var $alt = $('<input type="text"></input>').attr({
+            'class': $input.attr('class'),
+            'name':  $input.attr('name'),
+            'title': $input.attr('title'),
+            'style': $input.attr('style')
+          })
+            .val(title)
+            .insertBefore($input)
+            .addClass("password-title")
+            .addClass(blurClass)
+            .hide()
+            .focus(function() { // delegate to original
+              $d($alt).original.focus();
+            });
+          $d($input).alternative = $alt;
+          $d($alt).original = $input;
+        },
+        add: function() {
+          if ($input.val() === '') {
+            $input.hide();
+            var id = $input.attr("id");
+            $input.attr("id", null);
+            $d($input).alternative.attr("id", id).show();
+          }
+        },
+        remove: function() {
+          if ($input.is(":hidden")) {
+            var id = $d($input).alternative.attr("id");
+            $d($input).alternative.attr("id", null).hide();
+            $input.attr("id", id).show();
+          }
+        },
+        submit: function() {
+          $d($input).alternative.remove();
+        }
+      }
+    }
+
+    // only apply logic if the element has the attribute
+    if (title) { 
+      var strategyName = isPassword ? "replaceElement" : "changeValue";
+      var strategy = strategies[strategyName];
+
+      strategy.init();
+      // on blur, set value to title attr if text is blank
+      $input.blur(strategy.add)
+        .focus(strategy.remove)
+        .blur(); // now change all inputs to title
+
+      // clear the pre-defined text when form is submitted
+      $form.submit(strategy.submit);
+      $win.unload(strategy.submit); // handles Firefox's autocomplete
+    }
+  });
+};
+
+})(jQuery);
 
 /* ----
 Código a ser executado no carregamento desse script
@@ -85,6 +214,10 @@ function bindTeclado() {
 		
 		if (event.keyCode == 13) { //ENTER
 
+			if (window.instanciaEdicao == "cancelado") { 
+				window.instanciaEdicao = null;
+			}
+
 			//Se nenhuma linha está sendo editada, cria uma nova linha
 			if (window.instanciaEdicao == null) { 
 				novaInstancia();
@@ -98,34 +231,36 @@ function bindTeclado() {
 }
 
 //Abre a UI para inserção de uma nova instância
-//TODO esse ponto será generalizado no framework
 function novaInstancia() {
-	novaLinha();
+	window.editor.novaInstancia();
 }
 
 //Agrega os dados inseridos e envia o comando salvar (criar ou editar)
 //para o servidor. Reage à resposta do comando e atualiza a tela de listagem.
 function salvarInstancia() {
-	var tr = $('#listagem' + window.instanciaEdicao);
-	var link = getLink(window.instanciaEdicao);
+	var id = window.instanciaEdicao;
+	var elemento = $('#editor' + id);
+	var link = getLink(id);
 
 	var method = null;
-	if (window.instanciaEdicao == "0") {
+	if (id == "0") {
 		method = 'POST';
 	} else {
 		method = 'PUT';
 	}
 
-	var dados = montarJSON(tr);
+	var dados = montarJSON(elemento);
 
 	jQuery.ajax({
 		type : method,
 		url : link,
 		data : dados,
 		success : function(data, textStatus) {
+			window.editor.ocultarEditor();
 			carregarListagem();
 		},
 		error : function(XMLHttpRequest, textStatus, errorThrown) {
+			//TODO
 		}
 	});
 	return false;
@@ -144,9 +279,8 @@ function montarJSON(elemento) {
 }
 
 //Obtém o nome do i-ésimo atributo e o seu valor, para montar o JSON.
-//TODO esse ponto será generalizado no framework
 function getAtributoValor(elemento, i) {
-	return getAtributoValorCelulaEditavel(elemento, i);	
+	return window.editor.getAtributoValor(elemento, i);
 }
 
 /*
@@ -173,6 +307,11 @@ function carregarListagem() {
 				tbody.append(tr);
 			});
 	});
+}
+
+//Retorna o div principal da página de listagem
+function getDivPrincipal() {
+	return $("#list-" + window.entidade);
 }
 
 /*
@@ -212,7 +351,6 @@ function desenharLinha(item) {
 //Extrai os dados, relativos a uma coluna, de um objeto JSON e gera uma célula (td).
 function json2plano(json, coluna) {
 	var td = $("<td>");
-	var tipoColuna = coluna.tipo;
 	coluna.json2plano(td, json, coluna);
 	return td;
 }
@@ -224,11 +362,8 @@ function bindEdicaoLinha(id) {
 	tr.live('click', function() {
 		
 		if (window.instanciaEdicao == null ) {
-			var tr = $(this);
-			var id = getId(tr);
 			window.instanciaEdicao = id;
-			
-			editarInstancia(tr);			
+			editarInstancia($(this));			
 		}
 		
 		//Gambiarra para o cancelar funcionar direito
@@ -238,20 +373,15 @@ function bindEdicaoLinha(id) {
 	});
 }
 
-
-//Obtem o id da instância relativa ao tr. 
-function getId(tr) {
-	return tr.attr('id').replace("listagem", "");
-}
-
 //Desenha a UI para edição de uma instância.
 //TODO esse ponto será generalizado no framework
 function editarInstancia(tr) {
-	editarInstanciaLinhaEditavel(tr, window.instanciaEdicao);
+	window.editor.editarInstancia(tr, window.instanciaEdicao);
+//	editarInstanciaLinhaEditavel(tr, window.instanciaEdicao);
 	$("#edicao1").focus(); //Seta o foco no primeiro campo da edição
 }
 
-function excluirAjax(elemento, id) {
+function excluirAjax(id) {
 	var link = getLink(id);
 	jQuery.ajax({
 		type : 'DELETE',
@@ -268,106 +398,15 @@ function excluirAjax(elemento, id) {
 
 
 /* ----
-Código dependente do editor "LinhaEditavel"
----- */
-
-//Desenha uma nova linha para inserção dos dados da nova instância
-function novaLinha() {
-	var tr = $('<tr id="listagem0">');
-	for ( var i = 0; i < window.colunas.length; i++) {
-		$('<td>').appendTo(tr);
-	}
-
-	$("#list-" + window.entidade + " table tbody").append(tr);
-	window.instanciaEdicao = "0";
-	editarInstancia(tr);	
-}
-
-//Obtém o nome do atributo e o seu valor, para montar o JSON,
-//a partir de uma célula de uma linha editável
-function getAtributoValorCelulaEditavel(tr, indice) {
-	var coluna = window.colunas[indice - 1];
-	var td = tr.children("td:nth-child(" + indice + ")");
-	return coluna.edicao2json(td, coluna);
-}
-
-/*
-Desenha uma nova linha de edição, após a linha informada por parâmetro.
-A linha informada será removida, se for uma nova linha. Se for uma linha
-já existente, será ocultada e terá seu id modificado.
-Também desenha a célula com as opções de cancelar e excluir.
-*/
-function editarInstanciaLinhaEditavel(tr, id) {
-	var novoTr = $('<tr id="listagem' + id + '">');
-	tr.after(novoTr);
-
-	desenhaCelulasEditaveis(novoTr, tr);
-	desenhaCelulaOpcoes(novoTr, id);
-
-	if (id == "0") {
-		tr.remove();
-	} else {
-		tr.hide();
-		tr.attr("id", tr.attr("id") + "oculto");
-	}	
-}
-
-function desenhaCelulasEditaveis(novoTr, antigoTr) {
-	var quantColunas = window.colunas.length;
-	for (var i = 1; i <= quantColunas; i++) {
-		var td = $('<td>');
-		desenhaCelulaEditavel(td, antigoTr.children("td:nth-child(" + i + ")"),
-				window.colunas[i - 1], i);
-		novoTr.append(td);
-	}	
-}
-
-function desenhaCelulaEditavel(tdNovo, tdAntigo, coluna, indice) {
-	coluna.plano2edicao(tdNovo, tdAntigo, coluna, indice);
-}
-
-function desenhaCelulaOpcoes(tr, id) {
-	var td = $('<td>');
-
-	if (id != "0") {
-		td.append($('<a href="#" onclick="excluirAjax($(this), \'' + id
-				+ '\')">Excluir</a>'));
-		td.append(" ");
-	}
-
-	td.append($('<a href="#" onclick="cancelarLinhaEditavel($(this))">Cancelar</a>'));
-	tr.append(td);	
-}
-
-function cancelarLinhaEditavel(elemento) {
-	var tr = elemento.parent().parent();
-
-	window.instanciaEdicao = "cancelado";
-	
-	if (tr.attr("id") == "listagem0") {
-		tr.remove();
-
-	} else {
-		var quantColunas = window.colunas.length;
-		var id = getId(tr);
-
-		var trOculto = $('#listagem' + id + 'oculto');
-		trOculto.show();
-		trOculto.attr("id", 'listagem' + id);
-		tr.remove();
-	}
-}
-
-
-/* ----
 Funções de configuração que são invocadas pelo cliente
 ---- */
 
 //Cadastra o nome simples da entidade (ex. gasto) e 
 //o pacote e nome da classe da entidade (ex. abc.gasto).
-function cadastrarEntidade(entidade, classe) {
+function cadastrarEntidade(entidade, classe, editor) {
 	window.entidade = entidade;
 	window.classe = classe;
+	window.editor = window["editor" + editor];
 }
 
 /*
@@ -379,16 +418,17 @@ O mapa objColuna deve ser utilizado quando o tipo precisar de mais
 informações além do nome e tipo.
 As funções conversoras do tipo são copiados para o objColuna.
 */
-function cadastrarColuna(nomeColuna, tipoColuna, objColuna) {
-	if (objColuna == null) {
-		objColuna = new Object();
-	}
-
+function cadastrarColuna(tipoColuna, objColuna) {
 	window.colunas.push(objColuna);
 	var objTipo = window["tipo" + tipoColuna];
-	objColuna.nome = nomeColuna;
 	objColuna.plano2edicao = objTipo.plano2edicao;
 	objColuna.edicao2json = objTipo.edicao2json;
 	objColuna.json2plano = objTipo.json2plano;
+	objColuna.linhaForm = objTipo.linhaForm;
 }
 
+//Inicializa a página. Deve ser invocado após o cadastro de entidade e colunas
+function inicializarPagina() {
+	window.editor.inicializarPagina();
+	carregarListagem();
+}

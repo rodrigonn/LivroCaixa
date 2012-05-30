@@ -1,9 +1,24 @@
-cadastrarEntidade('venda', 'livrocaixa.Venda');
+cadastrarEntidade('venda', 'livrocaixa.Venda', 'Popup');
 
-cadastrarColuna('data', 'Date');
-cadastrarColuna('cliente', 'Text');
-cadastrarColuna('numeroNotaFiscal', 'Text');
-cadastrarColuna('valorTotal', 'Moeda');
-cadastrarColuna('status', 'Text');
+cadastrarColuna('Text', {
+	nome: 'numeroNotaFiscal', 
+	descricao: 'Número da NF'
+});
+cadastrarColuna('Text', {
+	nome: 'cliente', 
+	descricao: 'Cliente'
+});
+cadastrarColuna('Date', {
+	nome: 'data', 
+	descricao: 'Data de emissão'
+});
+cadastrarColuna('ItensNotaFiscal', {
+	nome: 'valorTotal', 
+	descricao: 'Valor total'
+});
+cadastrarColuna('Text', {
+	nome: 'status', 
+	descricao: 'Status'
+});
 
-carregarListagem();
+inicializarPagina();

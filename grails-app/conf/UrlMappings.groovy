@@ -11,6 +11,8 @@ class UrlMappings {
 //			constraints {
 //			}
 //		}
+
+		"/ajax/produto/porNome" (controller:"produto", action:"produtoPorNome")
 		
 		"/ajax/gasto/relatorio" (controller:"gasto", action:"relatorio")
 		"/ajax/gasto/$id?"(resource:"gasto")
