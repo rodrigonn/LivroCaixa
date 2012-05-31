@@ -322,9 +322,9 @@ para a lista completa de instâncias da entidade.
 */
 function getLink(id) {
 	if (id == null || id == "0") {
-		return "/LivroCaixa/ajax/" + window.entidade;
+		return "../ajax/" + window.entidade;
 	} else {
-		return "/LivroCaixa/ajax/" + window.entidade + "/" + id;
+		return "../ajax/" + window.entidade + "/" + id;
 	}
 }
 
@@ -396,6 +396,31 @@ function excluirAjax(id) {
 	return false;
 }
 
+/* ----
+Funções utilitárias
+---- */
+
+function getIcone(nome) {
+	return "../images/icons/" + nome + ".png";
+}
+
+function s2d(str) {
+	return parseFloat(str.replace(",", "."));
+}
+
+function priceFormat(input) {
+	input.priceFormat({
+		prefix : '',
+		centsSeparator : ',',
+		thousandsSeparator : '.',
+		clearPrefix : true
+	});	
+}
+
+function decimais2(valor) {
+	return ("" + valor.toFixed(2)).replace(".", ",");
+}
+
 
 /* ----
 Funções de configuração que são invocadas pelo cliente
@@ -425,6 +450,7 @@ function cadastrarColuna(tipoColuna, objColuna) {
 	objColuna.edicao2json = objTipo.edicao2json;
 	objColuna.json2plano = objTipo.json2plano;
 	objColuna.linhaForm = objTipo.linhaForm;
+	objColuna.form2json = objTipo.form2json;
 }
 
 //Inicializa a página. Deve ser invocado após o cadastro de entidade e colunas

@@ -61,18 +61,26 @@
 	border-color: white;
 }
 
-.subTituloItens {
+.subTituloItens td{
 	font-size: 12px;
-	border-color: white;
+	border-style: solid;
+	border-color: orange;
+	border-width: 1px;
+	font-weight: bold;
 }
 
-input.blur { color: #aaa; }
+input.blur {
+	color: #aaa;
+}
 
 .camposItem {
-	width:80px;
+	width: 65px;
 	margin-left: 10px;
 }
 
-.vendaPopupLinhaItem {
-	
+.vendaPopupLinhaItem td{
+	font-size: 12px;
+	border-style: solid;
+	border-color: orange;
+	border-width: 1px;
 }

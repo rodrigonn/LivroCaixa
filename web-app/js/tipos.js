@@ -16,7 +16,7 @@ function registrarEditores() {
 		inicializarPagina : carregarForm,
 		novaInstancia : abreFormNovo,
 		editarInstancia : editarInstanciaLinhaEditavel,
-		getAtributoValor : getAtributoValorCelulaEditavel,
+		getAtributoValor : getAtributoValorForm,
 		ocultarEditor : function() {
 		}
 	}
@@ -127,11 +127,12 @@ function carregarForm() {
 	div.dialog({
 		autoOpen : false,
 		height : 500,
-		width : 500,
+		width : 700,
 		modal : true,
 		buttons : {
 			Salvar : function() {
-				$(this).dialog("close");
+				$(this).dialog("close"); //TODO só fechar se der certo
+				salvarInstancia();
 			},
 			Cancelar : function() {
 				$(this).dialog("close");
@@ -175,50 +176,58 @@ function registrarTipos() {
 		plano2edicao : criarNumber,
 		edicao2json : getInputValue,
 		json2plano : getAttributeValue,
-		linhaForm : linhaNumber
+		linhaForm : linhaNumber,
+		form2json: formInputValue
 	}
 
 	window.tipoMoeda = {
 		plano2edicao : criarMoeda,
 		edicao2json : getInputValue,
 		json2plano : getMoedaValue,
-		linhaForm : linhaMoeda
+		linhaForm : linhaMoeda,
+		form2json: formInputValue
 	}
 
 	window.tipoText = {
 		plano2edicao : criarText,
 		edicao2json : getInputValue,
 		json2plano : getAttributeValue,
-		linhaForm : linhaTexto
+		linhaForm : linhaTexto,
+		form2json: formInputValue
 	}
 
 	window.tipoDate = {
 		plano2edicao : criarDatePicker,
 		edicao2json : getInputValue,
 		json2plano : getAttributeValue,
-		linhaForm : linhaData
+		linhaForm : linhaData,
+		form2json: formInputValue
 	}
 
 	window.tipoSelectNomeId = {
 		plano2edicao : criarSelectAjax,
 		edicao2json : getSelectValue,
 		json2plano : getNomeId,
-		linhaForm : textoSimples
+		linhaForm : textoSimples,
+		form2json: formInputValue
 	}
 
 	window.tipoHierarquia = {
 		plano2edicao : criarAutocompleteAjax,
 		edicao2json : getInputValueId,
 		json2plano : getNomeId,
-		linhaForm : textoSimples
+		linhaForm : textoSimples,
+		form2json: formInputValue
 	}
 	
 	window.tipoItensNotaFiscal = {
-		linhaForm: gridItensNotaFiscal
+		linhaForm: gridItensNotaFiscal,
+		form2json: jsonItensVenda
 	}
 
 	window.tipoSelectEstatico = {
-		linhaForm: linhaSelectEstatico
+		linhaForm: linhaSelectEstatico,
+		form2json: formInputValue
 	}
 }
 
@@ -247,10 +256,6 @@ function getAttributeValue(td, mapa, coluna) {
 function getMoedaValue(td, mapa, coluna) {
 	var valor = mapa[coluna.nome];
 	td.append(decimais2(valor));
-}
-
-function decimais2(valor) {
-	return ("" + valor.toFixed(2)).replace(".", ",");
 }
 
 function getNomeId(td, mapa, coluna) {
@@ -438,30 +443,38 @@ function textoSimples(form, coluna, indice) {
 }
 
 function gridItensNotaFiscal(form, coluna, indice) {
-	var table = $('<table>');
-	construirLinhaNovoProduto(table);
+	var table = $('<table id="edicao' + indice + '">');
 
-	var terceiraLinha = $('<tr>');
-	table.append(terceiraLinha);
-	terceiraLinha.append($('<td class="subTituloItens">Produto</td>'));
-	terceiraLinha.append($('<td class="subTituloItens">Unidade</td>'));
-	terceiraLinha.append($('<td class="subTituloItens">Vl. Unitário</td>'));
-	terceiraLinha.append($('<td class="subTituloItens">Quantidade</td>'));
-	terceiraLinha.append($('<td class="subTituloItens">Vl. Total</td>'));
-	terceiraLinha.append($('<td class="subTituloItens"></td>'));
+	var linhaTotal = $('<tr class="subTituloItens">');
+	linhaTotal.append($('<td colspan="5" style="text-align: right;border-style: none;">Valor total da venda: </td>'));
+	var tdTotal = $('<td style="border-style: none;">0,00</td>');
+	linhaTotal.append(tdTotal);
+			
+	construirLinhaNovoProduto(table, tdTotal);
+
+	var linha = $('<tr class="subTituloItens">');
+	linha.append($('<td style="width: 200px;">Produto</td>'));
+	linha.append($('<td style="width: 60px;">Unidade</td>'));
+	linha.append($('<td style="width: 80px;">Vl. Unitário</td>'));
+	linha.append($('<td style="width: 80px;">Quantidade</td>'));
+	linha.append($('<td style="width: 80px;">Vl. Total</td>'));
+	linha.append($('<td></td>'));
+
+	table.append(linha);
+	table.append(linhaTotal);
 
 	form.append(table);
 	cadastrarElementoPopup(table);
 }
 
-function construirLinhaNovoProduto(table) {
+function construirLinhaNovoProduto(table, tdTotal) {
 	var linha = $('<tr class="tituloItens ui-widget-header ui-corner-all">');
 	table.append(linha);
 
-	var celulaTitulo = $('<td>Itens</td>');
+	var celulaTitulo = $('<td>Itens da venda</td>');
 	linha.append(celulaTitulo);
 	
-	var celulaNovo = $('<td colspan="5"> Novo: </td>');
+	var celulaNovo = $('<td colspan="5" style="text-align: right; padding-right: 7px;"> Novo: </td>');
 	linha.append(celulaNovo);
 
 	var inputValor = 
@@ -481,49 +494,79 @@ function construirLinhaNovoProduto(table) {
 	inputValor.hint();
 	inputQuantidade.hint();
 	
-	escutarEnter(table, inputProduto, inputProduto, inputValor, inputQuantidade); 
-	escutarEnter(table, inputValor, inputProduto, inputValor, inputQuantidade);
-	escutarEnter(table, inputQuantidade, inputProduto, inputValor, inputQuantidade); 
+	escutarEnter(tdTotal, inputProduto, inputProduto, inputValor, inputQuantidade); 
+	escutarEnter(tdTotal, inputValor, inputProduto, inputValor, inputQuantidade);
+	escutarEnter(tdTotal, inputQuantidade, inputProduto, inputValor, inputQuantidade); 
 }
 
-function escutarEnter(table, input, inputProduto, inputValor, inputQuantidade) {
+function escutarEnter(tdTotal, input, inputProduto, inputValor, inputQuantidade) {
 	input.on('keypress', function(event) {
 		if (event.keyCode == 13) { //ENTER
-			salvarItem(table, inputProduto, inputValor, inputQuantidade);
+			salvarItem(tdTotal, inputProduto, inputValor, inputQuantidade);
 		}
 	});	
 }
 
-function salvarItem(table, inputProduto, inputValor, inputQuantidade) {
-	var idProduto = window.vendaPopupIdProdutoSelecionado;
+function salvarItem(tdTotal, inputProduto, inputValor, inputQuantidade) {
+	var idProduto = window.vendaPopupProdutoSelecionado.id;
+	var produto = inputProduto.val();
 	var valor = inputValor.val();
 	var quantidade = inputQuantidade.val();
-	inputProduto.val('');
-	inputValor.val('');
-	inputQuantidade.val('');
-	window.vendaPopupIdProdutoSelecionado = null;
 	
-	var linha = $('<tr class="vendaPopupLinhaItem">teste</tr>');
-	table.append(linha);
+	if (quantidade == null || quantidade == '') {
+		inputQuantidade.focus();
+		
+	} else {
+		inputProduto.val('');
+		inputValor.val('');
+		inputQuantidade.val('');
+		inputValor.focus();
+		inputProduto.focus();
+		
+		window.vendaPopupProdutoSelecionado = null;
+		criarLinhaItem(tdTotal, idProduto, produto, valor, quantidade);
+	}
 }
-
-function priceFormat(input) {
-	input.priceFormat({
-		prefix : '',
-		centsSeparator : ',',
-		thousandsSeparator : '.',
-		clearPrefix : true
-	});	
+function criarLinhaItem(tdTotal, idProduto, produto, valor, quantidade) {
+	var linha = $('<tr class="vendaPopupLinhaItem">');
+	tdTotal.parent().before(linha);
+	
+	var inputIdProduto = $('<input type="hidden">');
+	inputIdProduto.val(idProduto);
+	
+	var tdProduto = $('<td>');
+	tdProduto.append(inputIdProduto);
+	tdProduto.append(produto);
+	
+	var valorTotal = s2d(valor) * s2d(quantidade);
+	var totalNF = s2d(tdTotal.html());
+	tdTotal.html(decimais2(totalNF + valorTotal));
+	
+	linha.append(tdProduto);
+	linha.append($('<td>Unidade</td>'));
+	linha.append($('<td>' + valor + '</td>'));
+	linha.append($('<td>' + quantidade + '</td>'));
+	linha.append($('<td>' + decimais2(valorTotal) +'</td>'));
+	
+	var tdOpcoes = $('<td>');
+	var imgExcluir = $('<img src="' + getIcone('delete') + '" title="Excluir">');
+	tdOpcoes.append(imgExcluir);
+	imgExcluir.on('click', function() {
+		linha.remove();
+		tdTotal.html(decimais2(s2d(tdTotal.html()) - valorTotal));
+	});
+	
+	linha.append(tdOpcoes);
 }
 
 function autoCompleteProduto(inputValor, inputQuantidade) {
 	var inputProduto = 
-		$('<input type="text" id="seletorProduto" title="Produto">');
+		$('<input type="text" id="seletorProduto" title="Produto" class="camposItem">');
 
 	inputProduto.autocomplete({
 		source : function(request, response) {
 			$.ajax({
-				url : '/LivroCaixa/ajax/produto/porNome',
+				url : '../ajax/produto/porNome',
 				type : "POST",
 				datatype : "jsonp",
 				data : {
@@ -548,11 +591,11 @@ function autoCompleteProduto(inputValor, inputQuantidade) {
 				inputProduto.val(ui.item.label);
 				inputValor.val(ui.item.preco);
 				inputQuantidade.focus();
-				window.vendaPopupIdProdutoSelecionado = ui.item.id;
-				return false;
+				window.vendaPopupProdutoSelecionado = ui.item;
 			} else {
-				window.vendaPopupIdProdutoSelecionado = null;
+				window.vendaPopupProdutoSelecionado = null;
 			}
+			return false;
 		}
 	});
 
@@ -561,4 +604,21 @@ function autoCompleteProduto(inputValor, inputQuantidade) {
 
 function linhaSelectEstatico(form, coluna, indice) {
 	//TODO
+}
+
+function getAtributoValorForm(form, indice) {
+	var coluna = window.colunas[indice - 1];
+	var edicao = $("#edicao" + indice);
+	return coluna.form2json(edicao, coluna);
+}
+
+function formInputValue(input, coluna) {
+	var json = "\"" + coluna.nome + "Id\" : \"" + input.val() + "\", ";
+	return json;
+}
+
+function jsonItensVenda(table, coluna) {
+	$.each(table.find(".vendaPopupLinhaItem"), function(i, item) {
+		window.alert(item.text());
+	});
 }
