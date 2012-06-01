@@ -17,7 +17,8 @@ class ProdutoController {
 						descricao: produto.toString(),
 						valor: produto.nome,
 						id: produto.id,
-						preco: 10.01]
+						preco: produto.precoVenda,
+						unidade: produto.unidade]
 			lista.add mapa
 		}
 

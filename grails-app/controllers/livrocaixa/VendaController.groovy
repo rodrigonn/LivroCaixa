@@ -1,8 +1,16 @@
 package livrocaixa
 
 import grails.converters.JSON
+import java.text.SimpleDateFormat
 
 class VendaController {
+	
+	def sdf = new SimpleDateFormat('dd/MM/yyyy')
+	
+	def decimal(str) {
+		str.replace(',', '.').toDouble()
+	}
+
 
     def index() {
         redirect(action: "list", params: params)
@@ -14,16 +22,34 @@ class VendaController {
     }
 
     def save = {
-        def vendaInstance = new Venda(params)
-//		gasto.tipoGasto = TipoGasto.get(params.int('tipoGastoId'))
+		def json = request.JSON
 		
-		if (vendaInstance.save(flush: true)) {
+		def venda = new Venda()
+		venda.cliente = Cliente.get(json.clienteId.toInteger())
+		venda.vendedor = Vendedor.get(json.vendedorId.toInteger())
+		venda.data = sdf.parse(json.data)
+		venda.numeroNotaFiscal = json.numeroNotaFiscal.toLong()	
+		venda.status = "Em aberto"
+		venda.comissao = 0.0
+		venda.outrosCustos = 0.0
+		venda.valorPago = 0.0	
+		
+		for (item in json.itensVenda) {
+			def i = new ItemVenda()
+			i.produto = Produto.get(item.produtoId.toInteger())
+			i.venda = venda
+			i.quantidade = decimal(item.quantidade)
+			i.valorUnitario = decimal(item.valorUnitario)
+			venda.addToItensVenda(i)
+		}
+		
+		if (venda.save(flush: true)) {
 			response.status = 201 // Created
-			render vendaInstance as JSON
+			render venda as JSON
 
         } else {
 			response.status = 500 //Internal Server Error
-        	render "Não foi possível criar a nova venda:\n ${vendaInstance.errors}"
+        	render "Não foi possível criar a nova venda:\n ${venda.errors}"
         }
     }
 

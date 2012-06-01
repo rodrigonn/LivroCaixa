@@ -223,7 +223,7 @@ function bindTeclado() {
 				novaInstancia();
 				
 			//Caso contrário, salva a linha que está sendo editada
-			} else {
+			} else if (window.editor.enterParaSalvar){
 				salvarInstancia();
 			}
 		}
@@ -254,7 +254,10 @@ function salvarInstancia() {
 	jQuery.ajax({
 		type : method,
 		url : link,
-		data : dados,
+		data : JSON.stringify(dados),
+		processData: false, 
+     	dataType: 'json', 
+     	contentType: 'application/json',
 		success : function(data, textStatus) {
 			window.editor.ocultarEditor();
 			carregarListagem();

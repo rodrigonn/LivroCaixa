@@ -9,17 +9,25 @@ class Venda {
 	Double outrosCustos
 	Date data = new Date()
 	Date vencimento = new Date()
+	Double valorTotal
 	Double valorPago
 	String status
-	static hasMany = [itemVenda: ItemVenda]
+	
+	static hasMany = [itensVenda: ItemVenda]
+	static transients = [ "valorTotal" ]
 
-	def getValorTotal() {
-		return 10.0 //TODO
+	def afterLoad() {
+		valorTotal = 0.0;
+		
+		itensVenda.each {
+			valorTotal += it.quantidade * it.valorUnitario
+		}
 	}
 	
     static constraints = {
 		numeroNotaFiscal(nullable:false,blank:false)
 		status(inList:["Em aberto", "Pago", "Atrasado", "Cancelado"])
+		vendedor(nullable:true,blank:true)
     }
 	
 	String toString() {

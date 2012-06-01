@@ -24,16 +24,15 @@
 				<thead>
 					<tr>
 					
-						<g:sortableColumn property="data" title="${message(code: 'venda.data.label', default: 'Data')}" />
+						<g:sortableColumn property="numeroNotaFiscal" title="${message(code: 'venda.numeroNotaFiscal.label', default: 'Numero Nota Fiscal')}" />
 						
 						<th><g:message code="venda.cliente.label" default="Cliente" /></th>
 						
-						<g:sortableColumn property="numeroNotaFiscal" title="${message(code: 'venda.numeroNotaFiscal.label', default: 'Numero Nota Fiscal')}" />
-					
-						<g:sortableColumn property="valorTotal" title="Valor total" />
+						<th><g:message code="venda.vendedor.label" default="Vendedor" /></th>
 						
-						<g:sortableColumn property="status" title="${message(code: 'venda.status.label', default: 'Status')}" />
-										
+						<g:sortableColumn property="data" title="${message(code: 'venda.data.label', default: 'Data')}" />
+						
+						<g:sortableColumn property="valorTotal" title="Valor total" />
 					</tr>
 				</thead>
 				<tbody>

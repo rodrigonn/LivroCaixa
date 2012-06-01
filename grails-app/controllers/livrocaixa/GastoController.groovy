@@ -20,8 +20,9 @@ class GastoController {
 	}
 
 	def save = {
-		def gasto = new Gasto(params)
-		gasto.tipoGasto = TipoGasto.get(params.int('tipoGastoId'))
+		def json = request.JSON
+		def gasto = new Gasto(json)
+		gasto.tipoGasto = TipoGasto.get(json.tipoGastoId.toLong())
 
 		if (gasto.save(flush: true)) {
 			response.status = 201 // Created
@@ -33,9 +34,10 @@ class GastoController {
 	}
 
 	def update = {
+		def json = request.JSON
 		def gasto = Gasto.get(params.int('id'))
-		gasto.properties = params
-		gasto.tipoGasto = TipoGasto.get(params.int('tipoGastoId'))
+		gasto.properties = json
+		gasto.tipoGasto = TipoGasto.get(json.tipoGastoId.toLong())
 
 		if (gasto.save(flush: true)) {
 			response.status = 201 // Created

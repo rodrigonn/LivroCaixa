@@ -3,22 +3,21 @@ registrarEditores();
 
 function registrarEditores() {
 	window.editorLinhaEditavel = {
-		inicializarPagina : function() {
-		},
+		inicializarPagina : function() {},
 		novaInstancia : novaLinha,
 		editarInstancia : editarInstanciaLinhaEditavel,
 		getAtributoValor : getAtributoValorCelulaEditavel,
-		ocultarEditor : function() {
-		}
+		ocultarEditor : function() {},
+		enterParaSalvar: true
 	}
 
 	window.editorPopup = {
 		inicializarPagina : carregarForm,
 		novaInstancia : abreFormNovo,
-		editarInstancia : editarInstanciaLinhaEditavel,
+		editarInstancia : function() {},
 		getAtributoValor : getAtributoValorForm,
-		ocultarEditor : function() {
-		}
+		ocultarEditor : function() {}, 
+		enterParaSalvar: false
 	}
 }
 
@@ -119,7 +118,7 @@ function carregarForm() {
 
 	getDivPrincipal().after(div);
 	div.append(form);
-	
+
 	window.editorPopup.elementos = [];
 
 	construirForm(form);
@@ -131,7 +130,7 @@ function carregarForm() {
 		modal : true,
 		buttons : {
 			Salvar : function() {
-				$(this).dialog("close"); //TODO só fechar se der certo
+				$(this).dialog("close"); // TODO só fechar se der certo
 				salvarInstancia();
 			},
 			Cancelar : function() {
@@ -151,7 +150,7 @@ function construirForm(form) {
 		form.append("<br>");
 	}
 
-	//Ajustar tamanho das labels
+	// Ajustar tamanho das labels
 	var max = 0;
 	$("label").each(function() {
 		if ($(this).width() > max)
@@ -168,6 +167,7 @@ function abreFormNovo() {
 	var div = $("#editor");
 	div.dialog("open");
 	div.attr('id', 'editor0');
+	window.instanciaEdicao = "0";
 }
 
 function registrarTipos() {
@@ -177,7 +177,7 @@ function registrarTipos() {
 		edicao2json : getInputValue,
 		json2plano : getAttributeValue,
 		linhaForm : linhaNumber,
-		form2json: formInputValue
+		form2json : formInputValue
 	}
 
 	window.tipoMoeda = {
@@ -185,7 +185,7 @@ function registrarTipos() {
 		edicao2json : getInputValue,
 		json2plano : getMoedaValue,
 		linhaForm : linhaMoeda,
-		form2json: formInputValue
+		form2json : formInputValue
 	}
 
 	window.tipoText = {
@@ -193,7 +193,7 @@ function registrarTipos() {
 		edicao2json : getInputValue,
 		json2plano : getAttributeValue,
 		linhaForm : linhaTexto,
-		form2json: formInputValue
+		form2json : formInputValue
 	}
 
 	window.tipoDate = {
@@ -201,15 +201,15 @@ function registrarTipos() {
 		edicao2json : getInputValue,
 		json2plano : getAttributeValue,
 		linhaForm : linhaData,
-		form2json: formInputValue
+		form2json : formInputValue
 	}
 
 	window.tipoSelectNomeId = {
 		plano2edicao : criarSelectAjax,
 		edicao2json : getSelectValue,
 		json2plano : getNomeId,
-		linhaForm : textoSimples,
-		form2json: formInputValue
+		linhaForm : formSelectAjax,
+		form2json : formInputValueId
 	}
 
 	window.tipoHierarquia = {
@@ -217,17 +217,26 @@ function registrarTipos() {
 		edicao2json : getInputValueId,
 		json2plano : getNomeId,
 		linhaForm : textoSimples,
-		form2json: formInputValue
+		form2json : formInputValueId
 	}
-	
+
+	window.tipoAutocomplete = {
+		plano2edicao : criarAutocompleteAjax,
+		edicao2json : getInputValueId,
+		json2plano : getNomeId,
+		linhaForm : formAutocompleteAjax,
+		form2json : formInputValueId
+	}
+
 	window.tipoItensNotaFiscal = {
-		linhaForm: gridItensNotaFiscal,
-		form2json: jsonItensVenda
+		linhaForm : gridItensNotaFiscal,
+		form2json : jsonItensVenda,
+		json2plano : getAttributeValue
 	}
 
 	window.tipoSelectEstatico = {
-		linhaForm: linhaSelectEstatico,
-		form2json: formInputValue
+		linhaForm : linhaSelectEstatico,
+		form2json : formInputValue
 	}
 }
 
@@ -261,6 +270,7 @@ function getMoedaValue(td, mapa, coluna) {
 function getNomeId(td, mapa, coluna) {
 	var nome = mapa[coluna.nome + "Nome"];
 	var id = mapa[coluna.nome + "Id"];
+	
 	$("<input type='hidden' value='" + id + "' />").appendTo(td);
 	td.append(nome);
 }
@@ -289,11 +299,13 @@ function cadastrarElementoPopup(elemento) {
 }
 
 function criarLabel(id, coluna) {
-	return $('<label for="' + id + '" class="etiqueta">' + coluna.descricao + ': </label>');
+	return $('<label for="' + id + '" class="etiqueta">' + coluna.descricao
+			+ ': </label>');
 }
 
 function criarInput(tipo, id) {
-	return $('<input type="' + tipo +'" id="' + id + '" class="text ui-widget-content ui-corner-all campo">');
+	return $('<input type="' + tipo + '" id="' + id
+			+ '" class="text ui-widget-content ui-corner-all campo">');
 }
 
 function criarMoeda(tdNovo, tdAntigo, coluna, indice) {
@@ -315,7 +327,7 @@ function linhaMoeda(form, coluna, indice) {
 	form.append(criarLabel(idCampo, coluna));
 	form.append(input);
 	cadastrarElementoPopup(input);
-	
+
 	priceFormat(input);
 }
 
@@ -412,6 +424,54 @@ function criarAutocompleteAjax(tdNovo, tdAntigo, coluna, indice) {
 	tdNovo.append(input);
 }
 
+function formAutocompleteAjax(form, coluna, indice) {
+//	var valor = tdAntigo.children("input:nth-child(1)").val();
+//	var descricao = tdAntigo.text();
+
+	var idCampo = 'edicao' + indice;
+//	var oculto = $("<input type='hidden' value='" + valor + "' />")
+	var oculto = $("<input type='hidden' value='' />")
+	form.append(oculto);
+
+	var input = criarInput("text", idCampo);
+//	input.val(descricao);
+
+	input.autocomplete({
+		source : function(request, response) {
+			$.ajax({
+				url : coluna.url,
+				type : "POST",
+				datatype : "jsonp",
+				data : {
+					pesquisa : request.term
+				},
+				success : function(data) {
+					response($.map(data, function(item) {
+						var linha = eval(item);
+						return {
+							label : linha.nome,
+							value : linha.nome,
+							id : linha.id
+						}
+					}));
+				}
+			});
+
+		},
+		select : function(event, ui) {
+			if (ui.item) {
+				input.val(ui.item.value);
+				oculto.val(ui.item.id);
+				return false;
+			}
+		}
+	});
+
+	form.append(criarLabel(idCampo, coluna));
+	form.append(input);
+	cadastrarElementoPopup(input);
+}
+
 function criarSelectAjax(tdNovo, tdAntigo, coluna, indice) {
 	var select = $('<select>', {
 		name : "edicao" + indice,
@@ -436,6 +496,33 @@ function criarSelectAjax(tdNovo, tdAntigo, coluna, indice) {
 	tdNovo.append(select);
 }
 
+function formSelectAjax(form, coluna, indice) {
+	var idCampo = 'edicao' + indice;
+	var select = $('<select>', {
+		name : idCampo,
+		id : coluna.nome
+	});
+
+	// var valor = tdAntigo.children("input:nth-child(1)").val();
+
+	$.getJSON(coluna.url, function(json) {
+		$.each(json, function(i, item) {
+			var linha = eval(item);
+			var option = $('<option value="' + linha.id + '">' + linha.nome
+					+ '</option>');
+			select.append(option);
+
+			// if (linha.id == valor) {
+			// option.attr("selected", "selected");
+			// }
+		});
+	});
+
+	form.append(criarLabel(idCampo, coluna));
+	form.append(select);
+	cadastrarElementoPopup(select);
+}
+
 function textoSimples(form, coluna, indice) {
 	var p = $("<p>Campo " + indice + ": " + coluna.nome + "</p>");
 	form.append(p);
@@ -446,10 +533,11 @@ function gridItensNotaFiscal(form, coluna, indice) {
 	var table = $('<table id="edicao' + indice + '">');
 
 	var linhaTotal = $('<tr class="subTituloItens">');
-	linhaTotal.append($('<td colspan="5" style="text-align: right;border-style: none;">Valor total da venda: </td>'));
+	linhaTotal
+			.append($('<td colspan="5" style="text-align: right;border-style: none;">Valor total da venda: </td>'));
 	var tdTotal = $('<td style="border-style: none;">0,00</td>');
 	linhaTotal.append(tdTotal);
-			
+
 	construirLinhaNovoProduto(table, tdTotal);
 
 	var linha = $('<tr class="subTituloItens">');
@@ -473,38 +561,38 @@ function construirLinhaNovoProduto(table, tdTotal) {
 
 	var celulaTitulo = $('<td>Itens da venda</td>');
 	linha.append(celulaTitulo);
-	
+
 	var celulaNovo = $('<td colspan="5" style="text-align: right; padding-right: 7px;"> Novo: </td>');
 	linha.append(celulaNovo);
 
-	var inputValor = 
-		$('<input type="text" title="Valor" class="camposItem">');
-	var inputQuantidade = 
-		$('<input type="text" title="Quantidade" class="camposItem">');
+	var inputValor = $('<input type="text" title="Valor" class="camposItem">');
+	var inputQuantidade = $('<input type="text" title="Quantidade" class="camposItem">');
 
 	var inputProduto = autoCompleteProduto(inputValor, inputQuantidade);
 
 	celulaNovo.append(inputProduto);
 	celulaNovo.append(inputValor);
 	celulaNovo.append(inputQuantidade);
-	
+
 	priceFormat(inputValor);
-	
+
 	inputProduto.hint();
 	inputValor.hint();
 	inputQuantidade.hint();
-	
-	escutarEnter(tdTotal, inputProduto, inputProduto, inputValor, inputQuantidade); 
+
+	escutarEnter(tdTotal, inputProduto, inputProduto, inputValor,
+			inputQuantidade);
 	escutarEnter(tdTotal, inputValor, inputProduto, inputValor, inputQuantidade);
-	escutarEnter(tdTotal, inputQuantidade, inputProduto, inputValor, inputQuantidade); 
+	escutarEnter(tdTotal, inputQuantidade, inputProduto, inputValor,
+			inputQuantidade);
 }
 
 function escutarEnter(tdTotal, input, inputProduto, inputValor, inputQuantidade) {
 	input.on('keypress', function(event) {
-		if (event.keyCode == 13) { //ENTER
+		if (event.keyCode == 13) { // ENTER
 			salvarItem(tdTotal, inputProduto, inputValor, inputQuantidade);
 		}
-	});	
+	});
 }
 
 function salvarItem(tdTotal, inputProduto, inputValor, inputQuantidade) {
@@ -512,42 +600,43 @@ function salvarItem(tdTotal, inputProduto, inputValor, inputQuantidade) {
 	var produto = inputProduto.val();
 	var valor = inputValor.val();
 	var quantidade = inputQuantidade.val();
-	
+
 	if (quantidade == null || quantidade == '') {
 		inputQuantidade.focus();
-		
+
 	} else {
 		inputProduto.val('');
 		inputValor.val('');
 		inputQuantidade.val('');
 		inputValor.focus();
 		inputProduto.focus();
-		
-		window.vendaPopupProdutoSelecionado = null;
+
 		criarLinhaItem(tdTotal, idProduto, produto, valor, quantidade);
+		window.vendaPopupProdutoSelecionado = null;
 	}
 }
 function criarLinhaItem(tdTotal, idProduto, produto, valor, quantidade) {
 	var linha = $('<tr class="vendaPopupLinhaItem">');
 	tdTotal.parent().before(linha);
+	var unidade = window.vendaPopupProdutoSelecionado.unidade;
 	
 	var inputIdProduto = $('<input type="hidden">');
 	inputIdProduto.val(idProduto);
-	
+
 	var tdProduto = $('<td>');
 	tdProduto.append(inputIdProduto);
 	tdProduto.append(produto);
-	
+
 	var valorTotal = s2d(valor) * s2d(quantidade);
 	var totalNF = s2d(tdTotal.html());
 	tdTotal.html(decimais2(totalNF + valorTotal));
-	
+
 	linha.append(tdProduto);
-	linha.append($('<td>Unidade</td>'));
+	linha.append($('<td>' + unidade + '</td>'));
 	linha.append($('<td>' + valor + '</td>'));
 	linha.append($('<td>' + quantidade + '</td>'));
-	linha.append($('<td>' + decimais2(valorTotal) +'</td>'));
-	
+	linha.append($('<td>' + decimais2(valorTotal) + '</td>'));
+
 	var tdOpcoes = $('<td>');
 	var imgExcluir = $('<img src="' + getIcone('delete') + '" title="Excluir">');
 	tdOpcoes.append(imgExcluir);
@@ -555,13 +644,12 @@ function criarLinhaItem(tdTotal, idProduto, produto, valor, quantidade) {
 		linha.remove();
 		tdTotal.html(decimais2(s2d(tdTotal.html()) - valorTotal));
 	});
-	
+
 	linha.append(tdOpcoes);
 }
 
 function autoCompleteProduto(inputValor, inputQuantidade) {
-	var inputProduto = 
-		$('<input type="text" id="seletorProduto" title="Produto" class="camposItem">');
+	var inputProduto = $('<input type="text" id="seletorProduto" title="Produto" class="camposItem">');
 
 	inputProduto.autocomplete({
 		source : function(request, response) {
@@ -579,7 +667,8 @@ function autoCompleteProduto(inputValor, inputQuantidade) {
 							label : linha.descricao,
 							value : linha.valor,
 							id : linha.id,
-							preco: decimais2(linha.preco)
+							preco : decimais2(linha.preco),
+							unidade: linha.unidade
 						}
 					}));
 				}
@@ -603,7 +692,7 @@ function autoCompleteProduto(inputValor, inputQuantidade) {
 }
 
 function linhaSelectEstatico(form, coluna, indice) {
-	//TODO
+	// TODO
 }
 
 function getAtributoValorForm(form, indice) {
@@ -613,12 +702,32 @@ function getAtributoValorForm(form, indice) {
 }
 
 function formInputValue(input, coluna) {
-	var json = "\"" + coluna.nome + "Id\" : \"" + input.val() + "\", ";
+	var json = "\"" + coluna.nome + "\" : \"" + input.val() + "\", ";
+	return json;
+}
+
+function formInputValueId(input, coluna) {
+	var json = "\"" + coluna.nome + "Id\" : \"" + input.prev().prev().val() + "\", ";
 	return json;
 }
 
 function jsonItensVenda(table, coluna) {
-	$.each(table.find(".vendaPopupLinhaItem"), function(i, item) {
-		window.alert(item.text());
+	var json = '\"itensVenda\" : [';
+
+	$(".vendaPopupLinhaItem").each(function(i) {
+		var produtoId = $(this).children("td:nth-child(1)").children("input").val();
+		var valor = $(this).children("td:nth-child(3)").html();
+		var quantidade = $(this).children("td:nth-child(4)").html();
+
+		if (i > 0) {
+			json += ", ";
+		}
+		json += "{ \"produtoId\" : \"" + produtoId + "\", ";
+		json += "\"valorUnitario\" : \"" + valor + "\", ";
+		json += "\"quantidade\" : \"" + quantidade + "\", ";
+		json += "\"class\" : \"livrocaixa.ItemVenda\" }";
 	});
+	json += '], ';
+
+	return json;
 }
