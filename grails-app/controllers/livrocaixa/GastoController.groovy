@@ -81,20 +81,7 @@ class GastoController {
 	}
 	
 	def relatorio = {
-		def res = 
-			Gasto.executeQuery(
-				"select g.tipoGasto.id, g.tipoGasto.nome, " + 
-					"MONTH(g.data), YEAR(g.data), SUM(g.valor) " + 
-				"from Gasto g " + 
-				"group by YEAR(g.data), MONTH(g.data), g.tipoGasto.id " +
-				"order by YEAR(g.data), MONTH(g.data)")
-
 		ArvoreGradeGasto arvore = new ArvoreGradeGasto()
-
-		res.each {
-			arvore.adicionarCelula(it)
-		}		
-		
 		render arvore.getMapaGrade() as JSON
 	}
 }

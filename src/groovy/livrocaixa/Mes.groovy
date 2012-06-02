@@ -6,7 +6,8 @@ class Mes {
 	def ano
 	
 	String toString() {
-		"${numeroMes}/${ano}" 
+		def mesAjustado = ("" + numeroMes).padLeft(2, "0")
+		"${mesAjustado}/${ano}" 
 	}
 	
 	@Override

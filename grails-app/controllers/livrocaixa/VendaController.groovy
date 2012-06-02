@@ -4,36 +4,36 @@ import grails.converters.JSON
 import java.text.SimpleDateFormat
 
 class VendaController {
-	
+
 	def sdf = new SimpleDateFormat('dd/MM/yyyy')
-	
+
 	def decimal(str) {
 		str.replace(',', '.').toDouble()
 	}
 
 
-    def index() {
-        redirect(action: "list", params: params)
-    }
+	def index() {
+		redirect(action: "list", params: params)
+	}
 
-    def list() {
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        [vendaInstanceList: Venda.list(params), vendaInstanceTotal: Venda.count()]
-    }
+	def list() {
+		params.max = Math.min(params.max ? params.int('max') : 10, 100)
+		[vendaInstanceList: Venda.list(params), vendaInstanceTotal: Venda.count()]
+	}
 
-    def save = {
+	def save = {
 		def json = request.JSON
-		
+
 		def venda = new Venda()
 		venda.cliente = Cliente.get(json.clienteId.toInteger())
 		venda.vendedor = Vendedor.get(json.vendedorId.toInteger())
 		venda.data = sdf.parse(json.data)
-		venda.numeroNotaFiscal = json.numeroNotaFiscal.toLong()	
+		venda.numeroNotaFiscal = json.numeroNotaFiscal.toLong()
 		venda.status = "Em aberto"
 		venda.comissao = 0.0
 		venda.outrosCustos = 0.0
-		venda.valorPago = 0.0	
-		
+		venda.valorPago = 0.0
+
 		for (item in json.itensVenda) {
 			def i = new ItemVenda()
 			i.produto = Produto.get(item.produtoId.toInteger())
@@ -42,31 +42,31 @@ class VendaController {
 			i.valorUnitario = decimal(item.valorUnitario)
 			venda.addToItensVenda(i)
 		}
-		
+
 		if (venda.save(flush: true)) {
 			response.status = 201 // Created
 			render venda as JSON
 
-        } else {
+		} else {
 			response.status = 500 //Internal Server Error
-        	render "Não foi possível criar a nova venda:\n ${venda.errors}"
-        }
-    }
+			render "Não foi possível criar a nova venda:\n ${venda.errors}"
+		}
+	}
 
-    def update = {
-        def vendaInstance = Venda.get(params.int('id'))
-        vendaInstance.properties = params
-//		gasto.tipoGasto = TipoGasto.get(params.int('tipoGastoId'))
-		
-        if (vendaInstance.save(flush: true)) {
+	def update = {
+		def vendaInstance = Venda.get(params.int('id'))
+		vendaInstance.properties = params
+		//		gasto.tipoGasto = TipoGasto.get(params.int('tipoGastoId'))
+
+		if (vendaInstance.save(flush: true)) {
 			response.status = 201 // Created
 			render vendaInstance as JSON
-        } else {
+		} else {
 			response.status = 500 //Internal Server Error
 			render "Não foi possível editar a venda:\n ${vendaInstance.errors}"
-        }
-    }
-	
+		}
+	}
+
 	def show = {
 		if(params.id) {
 			render Venda.get(params.int('id')) as JSON
@@ -93,5 +93,26 @@ class VendaController {
 			Exemplo: /ajax/venda/id
 			"""
 		}
+	}
+
+	def relatorioVendas = { }
+	
+	def demonstrativo = { }
+
+	def relatorio = {
+		ArvoreGradeReceita arvore = new ArvoreGradeReceita()
+		def mapa = arvore.getMapaGrade()
+		render mapa as JSON
+	}
+	
+	def dre() {
+		ArvoreGradeGasto arvoreGasto = new ArvoreGradeGasto()
+		def mapaGasto = arvoreGasto.getMapaGrade()
+		
+		ArvoreGradeReceita arvoreReceita = new ArvoreGradeReceita()
+		def mapaReceita = arvoreReceita.getMapaGrade()
+
+		ArvoreGradeDRE arvoreDRE = new ArvoreGradeDRE(arvoreGasto, arvoreReceita)
+		render arvoreDRE.getMapaGrade() as JSON
 	}
 }
