@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat
 
 class VendaController {
 
+	//TODO colocar no util
 	def sdf = new SimpleDateFormat('dd/MM/yyyy')
 
 	def decimal(str) {
@@ -34,7 +35,7 @@ class VendaController {
 		venda.outrosCustos = 0.0
 		venda.valorPago = 0.0
 
-		for (item in json.itensVenda) {
+		for (item in json.itens) {
 			def i = new ItemVenda()
 			i.produto = Produto.get(item.produtoId.toInteger())
 			i.venda = venda
@@ -107,12 +108,10 @@ class VendaController {
 	
 	def dre() {
 		ArvoreGradeGasto arvoreGasto = new ArvoreGradeGasto()
-		def mapaGasto = arvoreGasto.getMapaGrade()
-		
 		ArvoreGradeReceita arvoreReceita = new ArvoreGradeReceita()
-		def mapaReceita = arvoreReceita.getMapaGrade()
+		ArvoreGradeCompra arvoreCompra = new ArvoreGradeCompra()
 
-		ArvoreGradeDRE arvoreDRE = new ArvoreGradeDRE(arvoreGasto, arvoreReceita)
+		ArvoreGradeDRE arvoreDRE = new ArvoreGradeDRE(arvoreGasto, arvoreReceita, arvoreCompra)
 		render arvoreDRE.getMapaGrade() as JSON
 	}
 }

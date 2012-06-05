@@ -35,6 +35,16 @@ class BootStrap {
 			returnArray['numeroNotaFiscal'] = it.numeroNotaFiscal
 			return returnArray
 		}
+		JSON.registerObjectMarshaller(Compra) {
+			def returnArray = [:]
+			returnArray['id'] = it.id
+			returnArray['fornecedorNome'] = it.fornecedor.nome
+			returnArray['fornecedorId'] = it.fornecedor.id
+			returnArray['data'] = df.format(it.data)
+			returnArray['valorTotal'] = it.valorTotal
+			returnArray['numeroNotaFiscal'] = it.numeroNotaFiscal
+			return returnArray
+		}
     }
     def destroy = {
     }

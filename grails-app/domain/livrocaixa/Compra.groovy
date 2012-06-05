@@ -6,10 +6,20 @@ class Compra {
 	Date data = new Date()
 	Fornecedor fornecedor
 	Date vencimento = new Date()
+	Double valorTotal
 	Double valorPago
 	String status
 	
-	static hasMany = [itemCompra: ItemCompra]
+	static hasMany = [itensCompra: ItemCompra]
+	static transients = [ "valorTotal" ]
+	
+	def afterLoad() {
+		valorTotal = 0.0;
+		
+		itensCompra.each {
+			valorTotal += it.quantidade * it.valorUnitario
+		}
+	}
 
     static constraints = {
 		

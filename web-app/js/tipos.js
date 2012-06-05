@@ -230,7 +230,7 @@ function registrarTipos() {
 
 	window.tipoItensNotaFiscal = {
 		linhaForm : gridItensNotaFiscal,
-		form2json : jsonItensVenda,
+		form2json : jsonItens,
 		json2plano : getAttributeValue
 	}
 
@@ -534,7 +534,7 @@ function gridItensNotaFiscal(form, coluna, indice) {
 
 	var linhaTotal = $('<tr class="subTituloItens">');
 	linhaTotal
-			.append($('<td colspan="5" style="text-align: right;border-style: none;">Valor total da venda: </td>'));
+			.append($('<td colspan="5" style="text-align: right;border-style: none;">Valor total da NF: </td>'));
 	var tdTotal = $('<td style="border-style: none;">0,00</td>');
 	linhaTotal.append(tdTotal);
 
@@ -559,7 +559,7 @@ function construirLinhaNovoProduto(table, tdTotal) {
 	var linha = $('<tr class="tituloItens ui-widget-header ui-corner-all">');
 	table.append(linha);
 
-	var celulaTitulo = $('<td>Itens da venda</td>');
+	var celulaTitulo = $('<td>Itens da NF</td>');
 	linha.append(celulaTitulo);
 
 	var celulaNovo = $('<td colspan="5" style="text-align: right; padding-right: 7px;"> Novo: </td>');
@@ -596,7 +596,7 @@ function escutarEnter(tdTotal, input, inputProduto, inputValor, inputQuantidade)
 }
 
 function salvarItem(tdTotal, inputProduto, inputValor, inputQuantidade) {
-	var idProduto = window.vendaPopupProdutoSelecionado.id;
+	var idProduto = window.popupProdutoSelecionado.id;
 	var produto = inputProduto.val();
 	var valor = inputValor.val();
 	var quantidade = inputQuantidade.val();
@@ -612,13 +612,13 @@ function salvarItem(tdTotal, inputProduto, inputValor, inputQuantidade) {
 		inputProduto.focus();
 
 		criarLinhaItem(tdTotal, idProduto, produto, valor, quantidade);
-		window.vendaPopupProdutoSelecionado = null;
+		window.popupProdutoSelecionado = null;
 	}
 }
 function criarLinhaItem(tdTotal, idProduto, produto, valor, quantidade) {
-	var linha = $('<tr class="vendaPopupLinhaItem">');
+	var linha = $('<tr class="popupLinhaItem">');
 	tdTotal.parent().before(linha);
-	var unidade = window.vendaPopupProdutoSelecionado.unidade;
+	var unidade = window.popupProdutoSelecionado.unidade;
 	
 	var inputIdProduto = $('<input type="hidden">');
 	inputIdProduto.val(idProduto);
@@ -680,9 +680,9 @@ function autoCompleteProduto(inputValor, inputQuantidade) {
 				inputProduto.val(ui.item.label);
 				inputValor.val(ui.item.preco);
 				inputQuantidade.focus();
-				window.vendaPopupProdutoSelecionado = ui.item;
+				window.popupProdutoSelecionado = ui.item;
 			} else {
-				window.vendaPopupProdutoSelecionado = null;
+				window.popupProdutoSelecionado = null;
 			}
 			return false;
 		}
@@ -711,10 +711,10 @@ function formInputValueId(input, coluna) {
 	return json;
 }
 
-function jsonItensVenda(table, coluna) {
-	var json = '\"itensVenda\" : [';
+function jsonItens(table, coluna) {
+	var json = '\"itens\" : [';
 
-	$(".vendaPopupLinhaItem").each(function(i) {
+	$(".popupLinhaItem").each(function(i) {
 		var produtoId = $(this).children("td:nth-child(1)").children("input").val();
 		var valor = $(this).children("td:nth-child(3)").html();
 		var quantidade = $(this).children("td:nth-child(4)").html();
@@ -724,8 +724,7 @@ function jsonItensVenda(table, coluna) {
 		}
 		json += "{ \"produtoId\" : \"" + produtoId + "\", ";
 		json += "\"valorUnitario\" : \"" + valor + "\", ";
-		json += "\"quantidade\" : \"" + quantidade + "\", ";
-		json += "\"class\" : \"livrocaixa.ItemVenda\" }";
+		json += "\"quantidade\" : \"" + quantidade + "\"}";
 	});
 	json += '], ';
 

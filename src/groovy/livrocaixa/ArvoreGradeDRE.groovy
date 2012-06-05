@@ -2,12 +2,14 @@ package livrocaixa
 
 class ArvoreGradeDRE {
 
+	ArvoreGradeCompra arvoreCompra
 	ArvoreGradeGasto arvoreGasto
 	ArvoreGradeReceita arvoreReceita
 
-	public ArvoreGradeDRE(arvoreGasto, arvoreReceita) {
+	public ArvoreGradeDRE(arvoreGasto, arvoreReceita, arvoreCompra) {
 		this.arvoreGasto = arvoreGasto
 		this.arvoreReceita = arvoreReceita
+		this.arvoreCompra = arvoreCompra
 	}
 
 	def getMapaGrade() {
@@ -19,6 +21,13 @@ class ArvoreGradeDRE {
 
 		arvoreGasto.getMeses().each {  meses.add it }
 
+		arvoreCompra.getMeses().each {
+			def descMes = it
+			if (! meses.contains(descMes)) {
+				meses.add descMes
+			}
+		}
+		
 		arvoreReceita.getMeses().each {
 			def descMes = it
 			if (! meses.contains(descMes)) {
@@ -47,7 +56,7 @@ class ArvoreGradeDRE {
 		def linhas = []
 
 		arvoreReceita.getProdutos().each { linhas.add it }
-
+		arvoreCompra.getProdutos().each { linhas.add it }
 		arvoreGasto.getTipos().each { linhas.add it }
 		
 		linhas.add( [nome:"Lucro", nivel:1 ] )
@@ -60,6 +69,7 @@ class ArvoreGradeDRE {
 		def lista = []
 
 		addCelulas(lista, arvoreReceita.total, arvoreReceita.total, meses)
+		addCelulas(lista, arvoreReceita.total, arvoreCompra.total, meses)
 		addCelulas(lista, arvoreReceita.total, arvoreGasto.total, meses)
 
 		criarLinhaLucro(meses, lista)
@@ -72,8 +82,9 @@ class ArvoreGradeDRE {
 		meses.each {
 			def valorTotal = arvoreReceita.total.celulasMeses[it] ?: 0.0
 			def receita = arvoreReceita.total.celulasMeses[it] ?: 0.0
+			def compra = arvoreCompra.total.celulasMeses[it] ?: 0.0
 			def gasto = arvoreGasto.total.celulasMeses[it] ?: 0.0
-			def valorCelula = receita - gasto
+			def valorCelula = receita - gasto - compra
 			valorCelula = valorCelula ?: 0.0
 
 			def percentual = 0.0
