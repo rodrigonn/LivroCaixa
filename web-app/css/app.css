@@ -26,6 +26,10 @@
 	border-style: double;
 }
 
+.nivel2 > td:first-child {
+    padding-left: 30px;
+} 
+
 .nivel3 {
 	font-size: 12px;
 	background-color: white;
@@ -36,6 +40,9 @@
 	font-weight: bold;
 }
 
+.nivel3 > td:first-child {
+    padding-left: 45px;
+} 
 .nivel4 {
 	font-size: 12px;
 	background-color: white;
@@ -44,6 +51,10 @@
 	border-color: green;
 	border-style: double;
 }
+
+.nivel4 > td:first-child {
+    padding-left: 60px;
+} 
 
 .campo {
 	margin: 6px;
